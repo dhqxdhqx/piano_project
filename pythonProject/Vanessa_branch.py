@@ -11,8 +11,6 @@ WIDTH = 740
 HEIGHT = 1334
 canvas = tk.Canvas(root, width=WIDTH, height=HEIGHT)
 canvas.grid(columnspan=5, rowspan=5)
-root.title("Piano Practice")
-
 
 # global entry1
 # global entry2
@@ -48,6 +46,9 @@ def login_screen():
     root.title("Piano Practice Login Screen")
     login_btn.configure(command=login)
 
+# def main_screen():
+print("Running the main screen worked!")
+root.title("Piano Practice")
 
 # logo
 logo_orig = Image.open('PianoPractice.png')
@@ -59,12 +60,16 @@ logo_label.grid(column=1, row=0)
 
 # login button
 login_text = tk.StringVar()
-login_btn = tk.Button(root, textvariable=login_text, command=lambda: login_screen(), font="Raleway", bg="#275D38",
-                      fg="white", height=2, width=15)
-login_text.set("Login now")
-login_btn.grid(column=1, row=1)
-
 canvas = tk.Canvas(root, width=600, height=250)
 canvas.grid(columnspan=3)
 
+login_btn = tk.Button()
+
+def main_screen():
+    login_btn = tk.Button(root, textvariable=login_text, command=lambda: login_screen(), font="Raleway", bg="#275D38", fg="white", height=2, width=15)
+    login_text.set("Login now")
+    login_btn.grid(column=1, row=1)
+
+
+main_screen()
 root.mainloop()
