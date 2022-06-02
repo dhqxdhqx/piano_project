@@ -4,6 +4,7 @@ import PyPDF2
 from PIL import Image, ImageTk
 from tkinter import messagebox
 from tkinter.filedialog import askopenfile
+''' An app to track piano practice time'''
 
 root = tk.Tk()
 
