@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import *
-import PyPDF2
+#import PyPDF2
 from PIL import Image, ImageTk
 from tkinter import messagebox
 from tkinter.filedialog import askopenfile

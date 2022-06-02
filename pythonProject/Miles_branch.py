@@ -1,4 +1,3 @@
-# from logging import warning
 import tkinter as tk
 from tkinter import *
 from PIL import Image, ImageTk
@@ -12,12 +11,6 @@ HEIGHT = 1334
 canvas = tk.Canvas(root, width=WIDTH, height=HEIGHT)
 canvas.grid(columnspan=5, rowspan=5)
 root.title("Piano Practice")
-# global entry1
-# global entry2
-
-
-
-
 
 
 def login_screen():
@@ -31,7 +24,7 @@ def login_screen():
     login_text.set("Login")
 
     #logo
-    logo = Image.open('PianoPractice.png')
+    logo = Image.open('images/PianoPractice.png')
     logo = logo.resize((816, 320))
     logo = ImageTk.PhotoImage(logo)
     logo_label = tk.Label(image=logo)
@@ -77,16 +70,15 @@ def login_screen():
 
 
 
-
-#user name/logout
-
 def practice_screen():
     
+    #frame to hold the user pic and name/logout button
     user_frame = tk.Frame(root)
     user_frame.grid(column=2,row=0)
+    
     root.title("Piano Practice")
 
-    practice_logo = Image.open('PianoPractice.png')
+    practice_logo = Image.open('images//PianoPractice.png')
     practice_logo = practice_logo.resize((500,196))
     practice_logo = ImageTk.PhotoImage(practice_logo)
     practice_logo_lbl = tk.Label(root, image=practice_logo)
@@ -112,9 +104,6 @@ def practice_screen():
     logout_btn.pack()
     logout_btn.bind("<Button-1>", lambda e: logout())
 
-    
-    
-    
-
+#run inital login screen on boot
 login_screen()
 root.mainloop()
