@@ -51,7 +51,7 @@ print("Running the main screen worked!")
 root.title("Piano Practice")
 
 # logo
-logo_orig = Image.open('PianoPractice.png')
+logo_orig = Image.open('images/PianoPractice.png')
 logo = logo_orig.resize((816, 320))
 logo = ImageTk.PhotoImage(logo)
 logo_label = tk.Label(image=logo)

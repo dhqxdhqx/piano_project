@@ -49,7 +49,7 @@ def login_screen():
 
 
 #logo
-logo = Image.open('PianoPractice.png')
+logo = Image.open('images/PianoPractice.png')
 logo = logo.resize((816, 320))
 logo = ImageTk.PhotoImage(logo)
 logo_label = tk.Label(image=logo)
