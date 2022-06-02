@@ -6,8 +6,8 @@
 <br>
 See examples below:
 
-![Examples of the project](pythonProject/example_pp.png)
+![Examples of the project](pythonProject/images/example_pp.png)
 <br>
 <br>
-![Example of the project calendar](pythonProject/example_pp_2.png)
+![Example of the project calendar](pythonProject/images/example_pp_2.png)
 

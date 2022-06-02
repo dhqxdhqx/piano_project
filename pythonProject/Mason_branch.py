@@ -26,7 +26,7 @@ loginFont = ("Comic Sans MS", 17, "bold")
 
 canvas = Canvas(root,width=1000,height=250)
 canvas.pack()
-imgLabel = ImageTk.PhotoImage(Image.open("PianoPractice.png"))
+imgLabel = ImageTk.PhotoImage(Image.open("images/PianoPractice.png"))
 canvas.create_image(20,20,anchor=NW,image=imgLabel)
 
 global entry1

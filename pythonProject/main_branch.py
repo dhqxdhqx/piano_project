@@ -4,6 +4,7 @@ import PyPDF2
 from PIL import Image, ImageTk
 from tkinter import messagebox
 from tkinter.filedialog import askopenfile
+''' An app to track piano practice time'''
 
 root = tk.Tk()
 
@@ -11,7 +12,7 @@ WIDTH = 740
 HEIGHT = 1334
 canvas = tk.Canvas(root, width=WIDTH, height=HEIGHT)
 canvas.grid(columnspan=5, rowspan=5)
-root.title("Piano Practice")
+
 # global entry1
 # global entry2
 
@@ -27,7 +28,7 @@ def login_screen():
     entry1 = Entry(root, bd=5, width="50")
     entry1.place(x=320, y=375)
 
-    entry2 = Entry(root, bd=5, width="50")
+    entry2 = Entry(root, show="*", bd=5, width="50")
     entry2.place(x=320, y=450)
 
     def login():
@@ -46,26 +47,30 @@ def login_screen():
     root.title("Piano Practice Login Screen")
     login_btn.configure(command=login)
 
+# def main_screen():
+print("Running the main screen worked!")
+root.title("Piano Practice")
 
-
-#logo
-logo = Image.open('PianoPractice.png')
-logo = logo.resize((816, 320))
+# logo
+logo_orig = Image.open('images/PianoPractice.png')
+logo = logo_orig.resize((816, 320))
 logo = ImageTk.PhotoImage(logo)
 logo_label = tk.Label(image=logo)
 logo_label.image = logo
 logo_label.grid(column=1, row=0)
 
-
-#login button
+# login button
 login_text = tk.StringVar()
-login_btn = tk.Button(root, textvariable=login_text, command=lambda:login_screen(), font="Raleway", bg="#275D38", fg="white", height=2, width=15)
-login_text.set("Login now")
-login_btn.grid(column=1, row=1)
-
 canvas = tk.Canvas(root, width=600, height=250)
 canvas.grid(columnspan=3)
 
+login_btn = tk.Button()
+
+def main_screen():
+    login_btn = tk.Button(root, textvariable=login_text, command=lambda: login_screen(), font="Raleway", bg="#275D38", fg="white", height=2, width=15)
+    login_text.set("Login now")
+    login_btn.grid(column=1, row=1)
 
 
+main_screen()
 root.mainloop()
