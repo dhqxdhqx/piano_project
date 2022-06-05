@@ -7,16 +7,14 @@ from tkinter import messagebox
 
 root = tk.Tk()
 
-WIDTH = 600
+WIDTH = 650
 HEIGHT = 800
 canvas = tk.Canvas(root, width=WIDTH, height=HEIGHT)
 canvas.grid(columnspan=1,rowspan=6)
-root.title("Piano Practice")
 
 
 def login_screen():
-    print("login worked!!")
-    
+        
     #login button
     login_text = tk.StringVar()
     login_text.set("Login now")
@@ -26,7 +24,7 @@ def login_screen():
 
     #logo
     logo = Image.open('images/PianoPractice.png')
-    logo = logo.resize((750, 320))
+    logo = logo.resize((600, 220))
     logo = ImageTk.PhotoImage(logo)
     logo_label = tk.Label(image=logo)
     logo_label.image = logo
@@ -47,8 +45,9 @@ def login_screen():
     entry2.grid(column=1,row=1,padx=10,pady=10)
 
     def login():
-        print("testing login")
+        
         global username
+        #get values from entry fields
         username = entry1.get()
         password = entry2.get()
         
@@ -56,9 +55,13 @@ def login_screen():
             messagebox.showinfo("", "Please enter Username")
         elif username == "Test" and password == "Test123":
             messagebox.showinfo("", "Let's Practice!")
+
+            #remove old widgets
             login_frame.destroy()
             logo_label.destroy()
             login_btn.destroy()
+
+            #load practice screen
             practice_screen()
         else:
             messagebox.showinfo("", "Incorrect username and password. Please try again.")
@@ -67,26 +70,27 @@ def login_screen():
     login_btn.configure(command=login)
 
 
-
-
-
 def practice_screen():
-    
-    #frame to hold the user pic and name/logout button
+
+    #frame to hole logo and user_frame
     top_frame = tk.Frame(root)
     top_frame.grid(column=0,row=0)
+    #frame to hold the user pic and name/logout button
     user_frame = tk.Frame(top_frame)
     user_frame.grid(column=1,row=0)
     
+    #update the title
     root.title("Piano Practice")
 
+    #logo resized
     practice_logo = Image.open('images//PianoPractice.png')
-    practice_logo = practice_logo.resize((500,196))
+    practice_logo = practice_logo.resize((400,196))
     practice_logo = ImageTk.PhotoImage(practice_logo)
     practice_logo_lbl = tk.Label(top_frame, image=practice_logo)
     practice_logo_lbl.image = practice_logo
     practice_logo_lbl.grid(column=0, row=0)
 
+    #generic user pic
     user_pic = Image.open('images//user.png')
     user_pic = user_pic.resize((100,100))
     user_pic = ImageTk.PhotoImage(user_pic)
@@ -94,6 +98,7 @@ def practice_screen():
     user_pic_lbl.image = user_pic
     user_pic_lbl.pack()
 
+    #action when user name is clicked
     def logout():
         logout_msgbox = messagebox.askquestion("Logout", "Do you want to logout?", icon='warning')
         if logout_msgbox == 'yes':
@@ -103,22 +108,25 @@ def practice_screen():
             button_frame.destroy()
             login_screen()
     
+    #displays as user name
     logout_btn = tk.Label(user_frame, text=username, font=("Raleway",20), fg="black", height=2, width=15, cursor='hand2')
     logout_btn.pack()
     logout_btn.bind("<Button-1>", lambda e: logout())
 
+    #frame to hold the Treeview object
     record_frame = tk.Frame(root)
     record_frame.grid(column=0,row=1)
     
+    #data frame object
     song_set = Treeview(record_frame)
     song_set.pack()
 
+    #set up columns in data frame
     song_set['columns']= ('date', 'song','time')
     song_set.column("#0", width=0,  stretch=NO)
     song_set.column("date",anchor=CENTER, width=150)
     song_set.column("song",anchor=CENTER, width=150)
     song_set.column("time",anchor=CENTER, width=150)
-
 
     song_set.heading("#0",text="",anchor=CENTER)
     song_set.heading("date",text="Date",anchor=CENTER)
@@ -139,9 +147,11 @@ def practice_screen():
         
         count += 1
     
+    #frame for user to input new songs, dates, and times
     input_frame = tk.Frame(root)
     input_frame.grid(column=0,row=2)
 
+    #input labels
     id = Label(input_frame,text="Date", fg="green")
     id.grid(row=0,column=0)
 
@@ -151,6 +161,7 @@ def practice_screen():
     award = Label(input_frame,text="Time", fg="green")
     award.grid(row=0,column=2)
 
+    #song data input entry fields
     id_entry = Entry(input_frame)
     id_entry.grid(row=1,column=0)
 
@@ -160,21 +171,23 @@ def practice_screen():
     award_entry = Entry(input_frame)
     award_entry.grid(row=1,column=2)
 
+    #functionality to input a new song record
     def input_record():
         
-
         global count
     
+        #insert values into the data frame
         song_set.insert(parent='',index='end',iid = count,text='',values=(id_entry.get(),fullname_entry.get(),award_entry.get()))
         count += 1
-
     
+        #clears entry fields
         id_entry.delete(0,END)
         fullname_entry.delete(0,END)
         award_entry.delete(0,END)
 
     #Select Record
     def select_record():
+
         #clear entry boxes
         id_entry.delete(0,END)
         fullname_entry.delete(0,END)
@@ -182,9 +195,9 @@ def practice_screen():
         
         #grab record
         selected=song_set.focus()
+
         #grab record values
         values = song_set.item(selected,'values')
-        #temp_label.config(text=selected)
 
         #output to entry boxes
         id_entry.insert(0,values[0])
@@ -194,6 +207,7 @@ def practice_screen():
     #save Record
     def update_record():
         selected=set.focus()
+        
         #save new data 
         set.item(selected,text="",values=(id_entry.get(),fullname_entry.get(),award_entry.get()))
         
@@ -220,98 +234,4 @@ def practice_screen():
 #run inital login screen on boot
 login_screen()
 root.mainloop()
-
-# from tkinter import *
-# from tkinter import ttk
-
-# ws=Tk()
-
-# ws.title('PythonGuides')
-# ws.geometry('500x500')
-
-
-
-
-
-# Input_frame = Frame(ws)
-# Input_frame.pack()
-
-# id = Label(Input_frame,text="Date", fg="green")
-# id.grid(row=0,column=0)
-
-# full_Name= Label(Input_frame,text="Song", fg="green")
-# full_Name.grid(row=0,column=1)
-
-# award = Label(Input_frame,text="Time", fg="green")
-# award.grid(row=0,column=2)
-
-# id_entry = Entry(Input_frame)
-# id_entry.grid(row=1,column=0)
-
-# fullname_entry = Entry(Input_frame)
-# fullname_entry.grid(row=1,column=1)
-
-# award_entry = Entry(Input_frame)
-# award_entry.grid(row=1,column=2)
-
-# def input_record():
-    
-
-#     global count
-   
-#     set.insert(parent='',index='end',iid = count,text='',values=(id_entry.get(),fullname_entry.get(),award_entry.get()))
-#     count += 1
-
-   
-#     id_entry.delete(0,END)
-#     fullname_entry.delete(0,END)
-#     award_entry.delete(0,END)
-
-# #Select Record
-# def select_record():
-#     #clear entry boxes
-#     id_entry.delete(0,END)
-#     fullname_entry.delete(0,END)
-#     award_entry.delete(0,END)
-    
-#     #grab record
-#     selected=set.focus()
-#     #grab record values
-#     values = set.item(selected,'values')
-#     #temp_label.config(text=selected)
-
-#     #output to entry boxes
-#     id_entry.insert(0,values[0])
-#     fullname_entry.insert(0,values[1])
-#     award_entry.insert(0,values[2])
-
-# #save Record
-# def update_record():
-#     selected=set.focus()
-#     #save new data 
-#     set.item(selected,text="",values=(id_entry.get(),fullname_entry.get(),award_entry.get()))
-    
-#    #clear entry boxes
-#     id_entry.delete(0,END)
-#     fullname_entry.delete(0,END)
-#     award_entry.delete(0,END)
-     
-# #button
-# Input_button = Button(ws,text = "Update Practice",command= input_record)
-
-# Input_button.pack()
-
-# select_button = Button(ws,text="Select Record", command=select_record)
-# select_button.pack(pady =10)
-
-# refresh_button = Button(ws,text="Refresh Record",command=update_record)
-# refresh_button.pack(pady = 10)
-
-# temp_label =Label(ws,text="")
-# temp_label.pack()
-
-
-
-# ws.mainloop()
-
 
