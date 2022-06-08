@@ -12,16 +12,34 @@ HEIGHT = 800
 canvas = tk.Canvas(root, width=WIDTH, height=HEIGHT)
 canvas.grid(columnspan=1,rowspan=6)
 
-
-def login_screen():
-        
+def main_screen():
     #login button
     login_text = tk.StringVar()
-    login_text.set("Login now")
-    login_btn = tk.Button(root, textvariable=login_text, command=lambda:login_screen(), font="Raleway", bg="#275D38", fg="white", height=2, width=15)
+    login_text.set("Login Now")
+    login_btn = tk.Button(root, textvariable=login_text, command=lambda:main_close(), font="Raleway", bg="#275D38", fg="white", height=2, width=15)
     login_btn.grid(column=0, row=2)
-    login_text.set("Login")
+    
+    #logo
+    logo = Image.open('images/PianoPractice.png')
+    logo = logo.resize((600, 220))
+    logo = ImageTk.PhotoImage(logo)
+    logo_label = tk.Label(image=logo)
+    logo_label.image = logo
+    logo_label.grid(column=0, row=0)
 
+    def main_close():
+        login_btn.destroy()
+        logo_label.destroy()
+        login_screen()
+
+def login_screen():
+
+    #login button
+    login_text = tk.StringVar()
+    login_text.set("Login")
+    login_btn = tk.Button(root, textvariable=login_text, command=lambda:login(), font="Raleway", bg="#275D38", fg="white", height=2, width=15)
+    login_btn.grid(column=0, row=2)
+    
     #logo
     logo = Image.open('images/PianoPractice.png')
     logo = logo.resize((600, 220))
@@ -41,7 +59,7 @@ def login_screen():
     entry1 = Entry(login_frame, bd=5, width="50")
     entry1.grid(column=1,row=0,padx=10,pady=10)
 
-    entry2 = Entry(login_frame, bd=5, width="50")
+    entry2 = Entry(login_frame, show="*", bd=5, width="50")
     entry2.grid(column=1,row=1,padx=10,pady=10)
 
     def login():
@@ -67,7 +85,6 @@ def login_screen():
             messagebox.showinfo("", "Incorrect username and password. Please try again.")
 
     root.title("Piano Practice Login Screen")
-    login_btn.configure(command=login)
 
 
 def practice_screen():
@@ -106,7 +123,7 @@ def practice_screen():
             record_frame.destroy()
             input_frame.destroy()
             button_frame.destroy()
-            login_screen()
+            main_screen()
     
     #displays as user name
     logout_btn = tk.Label(user_frame, text=username, font=("Raleway",20), fg="black", height=2, width=15, cursor='hand2')
@@ -232,6 +249,6 @@ def practice_screen():
     
 
 #run inital login screen on boot
-login_screen()
+main_screen()
 root.mainloop()
 
