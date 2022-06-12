@@ -4,6 +4,9 @@ from tkinter.ttk import Treeview
 from PIL import Image, ImageTk
 from tkinter import messagebox
 
+# for setting default date as today
+from datetime import date
+
 
 root = tk.Tk()
 
@@ -152,8 +155,8 @@ def practice_screen():
 
     #data
     data  = [
-        ['Monday',"Twinkle, Twinkle","15 minutes"],
-        ['Tuesday',"Mary had a little lamb","15 minutes"]]
+        ['06/01/22',"Twinkle, Twinkle","15"],
+        ['06/05/22',"Mary had a little lamb","15"]]
 
     global count
     count=0
@@ -169,18 +172,23 @@ def practice_screen():
     input_frame.grid(column=0,row=2)
 
     #input labels
-    id = Label(input_frame,text="Date", fg="green")
+    id = Label(input_frame,text="Date (DD/MM/YY)", fg="green")
     id.grid(row=0,column=0)
 
-    full_Name= Label(input_frame,text="Song", fg="green")
+    full_Name= Label(input_frame,text="Song Name", fg="green")
     full_Name.grid(row=0,column=1)
 
-    award = Label(input_frame,text="Time", fg="green")
+    award = Label(input_frame,text="Time in minutes", fg="green")
     award.grid(row=0,column=2)
 
     #song data input entry fields
     id_entry = Entry(input_frame)
     id_entry.grid(row=1,column=0)
+
+    # set current date to date entry field
+    today = date.today()
+    day_string = today.strftime("%d/%m/%y")
+    id_entry.insert(0, day_string)
 
     fullname_entry = Entry(input_frame)
     fullname_entry.grid(row=1,column=1)
@@ -192,7 +200,8 @@ def practice_screen():
     def input_record():
         
         global count
-    
+
+
         #insert values into the data frame
         song_set.insert(parent='',index='end',iid = count,text='',values=(id_entry.get(),fullname_entry.get(),award_entry.get()))
         count += 1
@@ -237,13 +246,13 @@ def practice_screen():
     button_frame = Frame(root)
     button_frame.grid(column=0,row=3)
     
-    input_button = Button(button_frame,text = "Update Practice",command= input_record)
+    input_button = Button(button_frame,text = "Add new practice entry",command= input_record)
     input_button.grid(column=0,row=0,pady=10)
 
     select_button = Button(button_frame,text="Select Record", command=select_record)
     select_button.grid(column=0,row=1,pady=10)
 
-    refresh_button = Button(button_frame,text="Refresh Record",command=update_record)
+    refresh_button = Button(button_frame,text="Save changes",command=update_record)
     refresh_button.grid(column=0,row=2,pady=10)
 
     
