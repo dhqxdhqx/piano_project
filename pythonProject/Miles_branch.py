@@ -141,6 +141,11 @@ def practice_screen():
     song_set = Treeview(record_frame)
     song_set.pack()
 
+    # # Add a scrollbar
+    # scrollbar = tk.ttk.Scrollbar(root, orient=tk.VERTICAL, command=song_set.yview)
+    # song_set.configure(yscroll=scrollbar.set)
+    # scrollbar.grid(row=0, column=1, sticky='ns')
+
     #set up columns in data frame
     song_set['columns']= ('date', 'song','time')
     song_set.column("#0", width=0,  stretch=NO)
@@ -172,7 +177,7 @@ def practice_screen():
     input_frame.grid(column=0,row=2)
 
     #input labels
-    id = Label(input_frame,text="Date (DD/MM/YY)", fg="green")
+    id = Label(input_frame,text="Date (MM/DD/YY)", fg="green")
     id.grid(row=0,column=0)
 
     full_Name= Label(input_frame,text="Song Name", fg="green")
@@ -187,7 +192,7 @@ def practice_screen():
 
     # set current date to date entry field
     today = date.today()
-    day_string = today.strftime("%d/%m/%y")
+    day_string = today.strftime("%m/%d/%y")
     id_entry.insert(0, day_string)
 
     fullname_entry = Entry(input_frame)
@@ -208,6 +213,12 @@ def practice_screen():
     
         #clears entry fields
         id_entry.delete(0,END)
+
+        # set current date to date entry field
+        today = date.today()
+        day_string = today.strftime("%m/%d/%y")
+        id_entry.insert(0, day_string)
+
         fullname_entry.delete(0,END)
         award_entry.delete(0,END)
 
