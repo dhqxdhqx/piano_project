@@ -75,7 +75,7 @@ def login_screen():
         if username == "" and password == "":
             messagebox.showinfo("", "Please enter Username")
         elif username == "Test" and password == "Test123":
-            messagebox.showinfo("", "Let's Practice!")
+            messagebox.showinfo("Login Successful", "Let's Practice!")
 
             #remove old widgets
             login_frame.destroy()
@@ -159,6 +159,7 @@ def practice_screen():
     song_set.heading("time",text="Minutes Practiced",anchor=CENTER)
 
     #data
+    # TODO change the data to be loaded from database
     data  = [
         ['06/01/22',"Twinkle, Twinkle","15"],
         ['06/05/22',"Mary had a little lamb","15"]]
@@ -167,9 +168,7 @@ def practice_screen():
     count=0
         
     for record in data:
-        
         song_set.insert(parent='',index='end',iid = count,text='',values=(record[0],record[1],record[2]))
-        
         count += 1
     
     #frame for user to input new songs, dates, and times
@@ -212,7 +211,7 @@ def practice_screen():
         #insert values into the data frame
 
         # Check if the date is valid
-        #TODO
+        #TODO Check if the date is valid
         date_entry = id_entry.get()
 
         # Check if the minutes are valid:
@@ -221,10 +220,13 @@ def practice_screen():
             if char.isdigit():
                 minutes += char
 
+        # If invalid minutes, else valid
+        # TODO add ELIF for invalid date
         if minutes=="":
             messagebox.showinfo("Error: invalid format: ", "Please enter a time in minutes. (ie. 15)")
             award_entry.delete(0, END)
         else:
+            # TODO while inserting data to the GUI, check for the entry in the data and update/add
             song_set.insert(parent='',index='end',iid = count,text='',values=(date_entry,fullname_entry.get(),minutes))
             count += 1
 
@@ -260,13 +262,17 @@ def practice_screen():
     def update_record():
         selected=set.focus()
         
-        #save new data 
+        #save new data
+        # TODO fix this so that it saves the entry over the previous entry and updates to data
         set.item(selected,text="",values=(id_entry.get(),fullname_entry.get(),award_entry.get()))
         
        #clear entry boxes
         id_entry.delete(0,END)
         fullname_entry.delete(0,END)
         award_entry.delete(0,END)
+
+        # Default date resets to today
+        id_entry.insert(0, day_string)
         
     #buttons
     button_frame = Frame(root)
