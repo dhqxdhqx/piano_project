@@ -192,6 +192,8 @@ def practice_screen():
 
     # set current date to date entry field
     today = date.today()
+    # day = today.weekday()
+    print(today.strftime('%A'))
     day_string = today.strftime("%m/%d/%y")
     id_entry.insert(0, day_string)
 
@@ -208,19 +210,32 @@ def practice_screen():
 
 
         #insert values into the data frame
-        song_set.insert(parent='',index='end',iid = count,text='',values=(id_entry.get(),fullname_entry.get(),award_entry.get()))
-        count += 1
-    
-        #clears entry fields
-        id_entry.delete(0,END)
 
-        # set current date to date entry field
-        today = date.today()
-        day_string = today.strftime("%m/%d/%y")
-        id_entry.insert(0, day_string)
+        # Check if the date is valid
+        #TODO
+        date_entry = id_entry.get()
 
-        fullname_entry.delete(0,END)
-        award_entry.delete(0,END)
+        # Check if the minutes are valid:
+        minutes=""
+        for char in award_entry.get():
+            if char.isdigit():
+                minutes += char
+
+        if minutes=="":
+            messagebox.showinfo("Error: invalid format: ", "Please enter a time in minutes. (ie. 15)")
+            award_entry.delete(0, END)
+        else:
+            song_set.insert(parent='',index='end',iid = count,text='',values=(date_entry,fullname_entry.get(),minutes))
+            count += 1
+
+            #clears entry fields
+            id_entry.delete(0,END)
+
+            # set current date to date entry field
+            id_entry.insert(0, day_string)
+
+            fullname_entry.delete(0,END)
+            award_entry.delete(0,END)
 
     #Select Record
     def select_record():
