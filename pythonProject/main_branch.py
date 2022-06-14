@@ -4,6 +4,9 @@ from tkinter.ttk import Treeview
 from PIL import Image, ImageTk
 from tkinter import messagebox
 
+# for setting default date as today
+from datetime import date
+
 root = tk.Tk()
 
 WIDTH = 650
@@ -74,7 +77,7 @@ def login_screen():
         if username == "" and password == "":
             messagebox.showinfo("", "Please enter Username")
         elif username == "Test" and password == "Test123":
-            messagebox.showinfo("", "Let's Practice!")
+            messagebox.showinfo("Login Successful", "Let's Practice!")
 
             # remove old widgets
             login_frame.destroy()
@@ -140,6 +143,11 @@ def practice_screen():
     song_set = Treeview(record_frame)
     song_set.pack()
 
+    # # Add a scrollbar
+    # scrollbar = tk.ttk.Scrollbar(root, orient=tk.VERTICAL, command=song_set.yview)
+    # song_set.configure(yscroll=scrollbar.set)
+    # scrollbar.grid(row=0, column=1, sticky='ns')
+
     # set up columns in data frame
     song_set['columns'] = ('date', 'song', 'time')
     song_set.column("#0", width=0, stretch=NO)
@@ -153,16 +161,16 @@ def practice_screen():
     song_set.heading("time", text="Minutes Practiced", anchor=CENTER)
 
     # data
+    # TODO change the data to be loaded from database
     data = [
-        ['Monday', "Twinkle, Twinkle", "15 minutes"],
-        ['Tuesday', "Mary had a little lamb", "15 minutes"]]
+        ['06/01/22', "Twinkle, Twinkle", "15"],
+        ['06/05/22', "Mary had a little lamb", "15"]]
 
     global count
     count = 0
 
     for record in data:
         song_set.insert(parent='', index='end', iid=count, text='', values=(record[0], record[1], record[2]))
-
         count += 1
 
     # frame for user to input new songs, dates, and times
@@ -170,18 +178,26 @@ def practice_screen():
     input_frame.grid(column=0, row=2)
 
     # input labels
-    id = Label(input_frame, text="Date", fg="green")
+    id = Label(input_frame, text="Date (MM/DD/YY)", fg="green")
     id.grid(row=0, column=0)
 
-    full_Name = Label(input_frame, text="Song", fg="green")
+    full_Name = Label(input_frame, text="Song Name", fg="green")
     full_Name.grid(row=0, column=1)
 
-    award = Label(input_frame, text="Time", fg="green")
+    award = Label(input_frame, text="Time in minutes", fg="green")
     award.grid(row=0, column=2)
 
     # song data input entry fields
     id_entry = Entry(input_frame)
     id_entry.grid(row=1, column=0)
+
+    # set current date to date entry field
+    today = date.today()
+    # day = today.weekday()
+    # TODO Check customer date format requirements
+    # print(today.strftime('%A'))
+    day_string = today.strftime("%m/%d/%y")
+    id_entry.insert(0, day_string)
 
     fullname_entry = Entry(input_frame)
     fullname_entry.grid(row=1, column=1)
@@ -195,14 +211,36 @@ def practice_screen():
         global count
 
         # insert values into the data frame
-        song_set.insert(parent='', index='end', iid=count, text='',
-                        values=(id_entry.get(), fullname_entry.get(), award_entry.get()))
-        count += 1
 
-        # clears entry fields
-        id_entry.delete(0, END)
-        fullname_entry.delete(0, END)
-        award_entry.delete(0, END)
+        # Check if the date is valid
+        # TODO Check if the date is valid
+        date_entry = id_entry.get()
+
+        # Check if the minutes are valid:
+        minutes = ""
+        for char in award_entry.get():
+            if char.isdigit():
+                minutes += char
+
+        # If invalid minutes, else valid
+        # TODO add ELIF for invalid date
+        if minutes == "":
+            messagebox.showinfo("Error: invalid format: ", "Please enter a time in minutes. (ie. 15)")
+            award_entry.delete(0, END)
+        else:
+            # TODO while inserting data to the GUI, check for the entry in the data and update/add
+            song_set.insert(parent='', index='end', iid=count, text='',
+                            values=(date_entry, fullname_entry.get(), minutes))
+            count += 1
+
+            # clears entry fields
+            id_entry.delete(0, END)
+
+            # set current date to date entry field
+            id_entry.insert(0, day_string)
+
+            fullname_entry.delete(0, END)
+            award_entry.delete(0, END)
 
     # Select Record
     def select_record():
@@ -228,6 +266,7 @@ def practice_screen():
         selected = set.focus()
 
         # save new data
+        # TODO fix this so that it saves the entry over the previous entry and updates to data
         set.item(selected, text="", values=(id_entry.get(), fullname_entry.get(), award_entry.get()))
 
         # clear entry boxes
@@ -235,17 +274,20 @@ def practice_screen():
         fullname_entry.delete(0, END)
         award_entry.delete(0, END)
 
+        # Default date resets to today
+        id_entry.insert(0, day_string)
+
     # buttons
     button_frame = Frame(root)
     button_frame.grid(column=0, row=3)
 
-    input_button = Button(button_frame, text="Update Practice", command=input_record)
+    input_button = Button(button_frame, text="Add new practice entry", command=input_record)
     input_button.grid(column=0, row=0, pady=10)
 
     select_button = Button(button_frame, text="Select Record", command=select_record)
     select_button.grid(column=0, row=1, pady=10)
 
-    refresh_button = Button(button_frame, text="Refresh Record", command=update_record)
+    refresh_button = Button(button_frame, text="Save changes", command=update_record)
     refresh_button.grid(column=0, row=2, pady=10)
 
 

@@ -192,7 +192,8 @@ def practice_screen():
     # set current date to date entry field
     today = date.today()
     # day = today.weekday()
-    print(today.strftime('%A'))
+    # TODO Check customer date format requirements
+    # print(today.strftime('%A'))
     day_string = today.strftime("%m/%d/%y")
     id_entry.insert(0, day_string)
 
