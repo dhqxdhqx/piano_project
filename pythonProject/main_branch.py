@@ -278,16 +278,19 @@ def practice_screen():
         id_entry.insert(0, day_string)
 
     # buttons
+    #To choose a session, click the practice session and press the button "Select Practice Session"
+    #To update a past entry, modify the entry as you desire, then press "Refresh practice calendar"
+    #For creating a new record, type information in box and then press "Update today's practice"
     button_frame = Frame(root)
     button_frame.grid(column=0, row=3)
 
     input_button = Button(button_frame, text="Add new practice entry", command=input_record)
     input_button.grid(column=0, row=0, pady=10)
 
-    select_button = Button(button_frame, text="Select Record", command=select_record)
+    select_button = Button(button_frame, text="Select Practice Session", command=select_record)
     select_button.grid(column=0, row=1, pady=10)
 
-    refresh_button = Button(button_frame, text="Save changes", command=update_record)
+    refresh_button = Button(button_frame, text="Save Practice Changes", command=update_record)
     refresh_button.grid(column=0, row=2, pady=10)
 
 
