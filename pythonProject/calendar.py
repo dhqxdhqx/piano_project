@@ -103,14 +103,17 @@ def update_record():
     award_entry.delete(0,END)
      
 #button
-Input_button = Button(ws,text = "Update Practice",command= input_record)
+#To choose a session, click the practice session and press the button "Select Practice Session"
+#To update a past entry, modify the entry as you desire, then press "Refresh practice calendar"
+#For creating a new record, type information in box and then press "Update today's practice"
+Input_button = Button(ws,text = "Update Today's Practice",command= input_record)
 
 Input_button.pack()
 
-select_button = Button(ws,text="Select Record", command=select_record)
+select_button = Button(ws,text="Select Practice Session", command=select_record)
 select_button.pack(pady =10)
 
-refresh_button = Button(ws,text="Refresh Record",command=update_record)
+refresh_button = Button(ws,text="Refresh Practice Calendar",command=update_record)
 refresh_button.pack(pady = 10)
 
 temp_label =Label(ws,text="")
