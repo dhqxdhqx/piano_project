@@ -251,6 +251,7 @@ def practice_screen():
         award_entry.delete(0, END)
 
         # grab record
+        global selected
         selected = song_set.focus()
 
         # grab record values
@@ -263,11 +264,11 @@ def practice_screen():
 
     # save Record
     def update_record():
-        selected = set.focus()
+        selected = song_set.focus()
 
         # save new data
         # TODO fix this so that it saves the entry over the previous entry and updates to data
-        set.item(selected, text="", values=(id_entry.get(), fullname_entry.get(), award_entry.get()))
+        song_set.item(selected, text="", values=(id_entry.get(), fullname_entry.get(), award_entry.get()))
 
         # clear entry boxes
         id_entry.delete(0, END)
@@ -284,13 +285,13 @@ def practice_screen():
     button_frame = Frame(root)
     button_frame.grid(column=0, row=3)
 
-    input_button = Button(button_frame, text="Add new practice entry", command=input_record)
+    input_button = Button(button_frame, text="Add new Practice Session", command=input_record)
     input_button.grid(column=0, row=0, pady=10)
 
-    select_button = Button(button_frame, text="Select Practice Session", command=select_record)
+    select_button = Button(button_frame, text="Edit selected Practice Session", command=select_record)
     select_button.grid(column=0, row=1, pady=10)
 
-    refresh_button = Button(button_frame, text="Save Practice Changes", command=update_record)
+    refresh_button = Button(button_frame, text="Submit Practice Session Changes", command=update_record)
     refresh_button.grid(column=0, row=2, pady=10)
 
 
