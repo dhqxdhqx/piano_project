@@ -212,6 +212,9 @@ def practice_screen():
 
         # insert values into the data frame
 
+        # Check if a song name was entered
+        song_name = fullname_entry.get()
+
         # Check if the date is valid
         # TODO Check if the date is valid
         date_entry = id_entry.get()
@@ -227,10 +230,13 @@ def practice_screen():
         if minutes == "":
             messagebox.showinfo("Error: invalid format: ", "Please enter a time in minutes. (ie. 15)")
             award_entry.delete(0, END)
+
+        elif song_name == "":
+            messagebox.showinfo("Error: no song name entered.", "Please enter a valid song name.")
         else:
             # TODO while inserting data to the GUI, check for the entry in the data and update/add
             song_set.insert(parent='', index='end', iid=count, text='',
-                            values=(date_entry, fullname_entry.get(), minutes))
+                            values=(date_entry, song_name, minutes))
             count += 1
 
             # clears entry fields
@@ -251,7 +257,6 @@ def practice_screen():
         award_entry.delete(0, END)
 
         # grab record
-        global selected
         selected = song_set.focus()
 
         # grab record values
@@ -267,7 +272,6 @@ def practice_screen():
         selected = song_set.focus()
 
         # save new data
-        # TODO fix this so that it saves the entry over the previous entry and updates to data
         song_set.item(selected, text="", values=(id_entry.get(), fullname_entry.get(), award_entry.get()))
 
         # clear entry boxes
