@@ -5,7 +5,7 @@ from PIL import Image, ImageTk
 from tkinter import messagebox
 
 # for setting default date as today
-from datetime import date
+from datetime import date, timedelta
 
 root = tk.Tk()
 
@@ -160,11 +160,26 @@ def practice_screen():
     song_set.heading("song", text="Song", anchor=CENTER)
     song_set.heading("time", text="Minutes Practiced", anchor=CENTER)
 
+    # Create the current week to populate the date data field
+    this_week = []
+    a_week = 7
+    today = date.today()
+    today_day = today.weekday()
+    # today_day = 3 # for testing different weekdays
+    for i in range(a_week):
+        this_week.append(today - timedelta(days=today_day))
+        # print(today - timedelta(days=today_day))
+        today_day -= 1
+    # print(this_week)
+
     # data
     # TODO change the data to be loaded from database
     data = [
         ['06/01/22', "Twinkle, Twinkle", "15"],
         ['06/05/22', "Mary had a little lamb", "15"]]
+
+    # for i in range(a_week):
+    #     data[i][0] = this_week[i]
 
     global count
     count = 0
