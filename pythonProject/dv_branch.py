@@ -5,6 +5,10 @@ from PIL import Image, ImageTk
 from tkinter import messagebox
 import pickle
 
+from os.path import exists
+# imports and runs database creation element
+import create_sample_database
+
 # for setting default date as today
 from datetime import date, timedelta
 
@@ -14,6 +18,7 @@ WIDTH = 650
 HEIGHT = 800
 canvas = tk.Canvas(root, width=WIDTH, height=HEIGHT)
 canvas.grid(columnspan=1,rowspan=6)
+
 
 def main_screen():
     #login button
@@ -181,7 +186,13 @@ def practice_screen():
            with the date and song entry for that day, calls helper
            function to display reward info at bottom of screen.
            Retuns dictionary of user data.'''
+
         filename = "user_data"
+
+        # Check if sample database has been created:
+        if not exists(filename):
+            create_sample_database.create_database()
+
         output_file = open(filename, 'rb')
         data = pickle.load(output_file)
         total, remain, practice_table = 0, data[username][1], data[username][2]
