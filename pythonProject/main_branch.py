@@ -3,6 +3,11 @@ import tkinter as tk
 from tkinter.ttk import Treeview
 from PIL import Image, ImageTk
 from tkinter import messagebox
+import pickle
+
+from os.path import exists
+# imports and runs database creation element
+import create_sample_database
 
 # for setting default date as today
 from datetime import date, timedelta
@@ -19,8 +24,8 @@ def main_screen():
     # login button
     login_text = tk.StringVar()
     login_text.set("Login Now")
-    login_btn = tk.Button(root, textvariable=login_text, command=lambda: main_close(), font="Raleway", bg="#275D38",
-                          fg="white", height=2, width=15)
+    login_btn = tk.Button(root, textvariable=login_text, command=lambda: main_close(),
+                          font="Raleway", bg="#275D38", fg="white", height=2, width=15)
     login_btn.grid(column=0, row=2)
 
     # logo
@@ -41,8 +46,8 @@ def login_screen():
     # login button
     login_text = tk.StringVar()
     login_text.set("Login")
-    login_btn = tk.Button(root, textvariable=login_text, command=lambda: login(), font="Raleway", bg="#275D38",
-                          fg="white", height=2, width=15)
+    login_btn = tk.Button(root, textvariable=login_text, command=lambda: login(),
+                          font="Raleway", bg="#275D38", fg="white", height=2, width=15)
     login_btn.grid(column=0, row=2)
 
     # logo
@@ -76,7 +81,7 @@ def login_screen():
 
         if username == "" and password == "":
             messagebox.showinfo("", "Please enter Username")
-        elif username == "Test" and password == "Test123":
+        elif (username == "Test" and password == "Test123") or (username == "x" and password == "x"):
             messagebox.showinfo("Login Successful", "Let's Practice!")
 
             # remove old widgets
@@ -93,7 +98,7 @@ def login_screen():
 
 
 def practice_screen():
-    # frame to hole logo and user_frame
+    # frame to hold logo and user_frame
     top_frame = tk.Frame(root)
     top_frame.grid(column=0, row=0)
     # frame to hold the user pic and name/logout button
@@ -119,21 +124,32 @@ def practice_screen():
     user_pic_lbl.image = user_pic
     user_pic_lbl.pack()
 
-    # action when user name is clicked
-    def logout():
-        logout_msgbox = messagebox.askquestion("Logout", "Do you want to logout?", icon='warning')
-        if logout_msgbox == 'yes':
-            top_frame.destroy()
-            record_frame.destroy()
-            input_frame.destroy()
-            button_frame.destroy()
-            main_screen()
-
     # displays as user name
-    logout_btn = tk.Label(user_frame, text=username, font=("Raleway", 20), fg="black", height=2, width=15,
-                          cursor='hand2')
-    logout_btn.pack()
-    logout_btn.bind("<Button-1>", lambda e: logout())
+    user_options = tk.Label(user_frame, text=username, font=("Raleway", 20), fg="black", height=2, width=15,
+                            cursor='hand2')
+    user_options.pack()
+    user_options.bind("<Button-1>", lambda e: user_menu())
+
+    # action when user name is clicked
+    def user_menu():
+
+        user_menu_window = Toplevel(root)
+        user_menu_window.grab_set()
+        logout_btn = tk.Button(user_menu_window, text="Log Out", command=lambda: logout(), font="Raleway", bg="#275D38",
+                               fg="white", height=2, width=15)
+        logout_btn.pack()
+
+        def logout():
+            logout_msgbox = messagebox.askquestion("Logout", "Do you want to logout?", icon='warning')
+            if logout_msgbox == 'yes':
+                user_menu_window.grab_release()
+                top_frame.destroy()
+                record_frame.destroy()
+                input_frame.destroy()
+                button_frame.destroy()
+                user_menu_window.destroy()
+                minutes_frame.destroy()
+                main_screen()
 
     # frame to hold the Treeview object
     record_frame = tk.Frame(root)
@@ -160,40 +176,81 @@ def practice_screen():
     song_set.heading("song", text="Song", anchor=CENTER)
     song_set.heading("time", text="Minutes Practiced", anchor=CENTER)
 
+    # overall minutes display
+    minutes_frame = Frame(root)
+    minutes_frame.grid(column=0, row=5)
+
     # Create the current week to populate the date data field
     this_week = []
-    a_week = 7
     today = date.today()
     today_day = today.weekday()
-    # today_day = 3 # for testing different weekdays
-    for i in range(a_week):
-        this_week.append(today - timedelta(days=today_day))
-        # print(today - timedelta(days=today_day))
+    for i in range(7):
+        dte = (today - timedelta(days=today_day))
+        this_week.append(dte.strftime("%a, %B %d"))
         today_day -= 1
-    # print(this_week)
+
+    #     print(this_week)
 
     # data
-    # TODO change the data to be loaded from database
-    data = [
-        ['06/01/22', "Twinkle, Twinkle", "15"],
-        ['06/05/22', "Mary had a little lamb", "15"]]
+    def load_entries(this_week):
+        '''Fills week display with dates and practice entries
+           First clears table of all information, then fills each line
+           with the date and song entry for that day, calls helper
+           function to display reward info at bottom of screen.
+           Retuns dictionary of user data.'''
 
-    # for i in range(a_week):
-    #     data[i][0] = this_week[i]
+        filename = "user_data"
 
-    global count
-    count = 0
+        # Check if sample database has been created:
+        if not exists(filename):
+            create_sample_database.create_database()
 
-    for record in data:
-        song_set.insert(parent='', index='end', iid=count, text='', values=(record[0], record[1], record[2]))
-        count += 1
+        output_file = open(filename, 'rb')
+        data = pickle.load(output_file)
+        total, remain, practice_table = 0, data[username][1], data[username][2]
+
+        # clear table
+        for item in song_set.get_children():
+            song_set.delete(item)
+
+        # load week with dates and any entries
+        for day in range(len(this_week)):
+            for ent in range(len(practice_table)):
+                entry = practice_table[ent]
+                if this_week[day] == entry[0]:
+                    song_set.insert(parent='', index='end', iid=day, text='',
+                                    values=(entry[0], entry[1], f"{entry[2]} minutes"))
+                    total += entry[2]
+                    remain -= entry[2]
+                    break
+                if this_week[day] != entry[0]:
+                    if ent == len(practice_table) - 1:
+                        song_set.insert(parent='', index='end', iid=day,
+                                        text='', values=(this_week[day], "", ""))
+                    else:
+                        continue
+        # helper function to display reward info at bottom of screen
+        minutes_help(total, remain)
+        return data
+
+    def minutes_help(total, remain):
+        '''Receives weekly total minutes and remaining minutes,
+           then displays them at bottom of screen.'''
+        Label(minutes_frame, text=f"Total Minutes: {total}", font="Raleway",
+              bg="white", fg="black", height=2, width=20).grid(column=0, row=0, sticky='w')
+        Label(minutes_frame, text=f"Minutes to Reward: {remain}", font="Raleway",
+              bg="white", fg="black", height=2, width=20).grid(column=2, row=0, sticky='e')
+
+    # creates dictionary from dat file
+    data = load_entries(this_week)
+    print(f"Initial data load for {username}:\n{data[username]}")
 
     # frame for user to input new songs, dates, and times
     input_frame = tk.Frame(root)
     input_frame.grid(column=0, row=2)
 
     # input labels
-    id = Label(input_frame, text="Date (MM/DD/YY)", fg="green")
+    id = Label(input_frame, text="Date", fg="green")
     id.grid(row=0, column=0)
 
     full_Name = Label(input_frame, text="Song Name", fg="green")
@@ -202,37 +259,42 @@ def practice_screen():
     award = Label(input_frame, text="Time in minutes", fg="green")
     award.grid(row=0, column=2)
 
+    # SONG DATE
     # song data input entry fields
     id_entry = Entry(input_frame)
     id_entry.grid(row=1, column=0)
 
     # set current date to date entry field
     today = date.today()
-    # day = today.weekday()
-    # TODO Check customer date format requirements
-    # print(today.strftime('%A'))
-    day_string = today.strftime("%m/%d/%y")
+    day_string = today.strftime("%a, %B %d")
+    # setup today as read only
     id_entry.insert(0, day_string)
+    id_entry.config(state='readonly')
 
+    # Beginning selection is set to current date
+    selected = song_set.get_children()[today.weekday()]
+    song_set.focus(selected)
+    song_set.selection_set(selected)
+
+    # grab record values
+    values = song_set.item(today.weekday(), 'values')
+
+    # SONG NAME
     fullname_entry = Entry(input_frame)
     fullname_entry.grid(row=1, column=1)
+    fullname_entry.insert(0, values[1])
 
+    # SONG TIME PRACTICED
     award_entry = Entry(input_frame)
     award_entry.grid(row=1, column=2)
+    award_entry.insert(0, values[2][:-8])
 
     # functionality to input a new song record
     def input_record():
-
-        global count
-
-        # insert values into the data frame
+        '''insert new values into the data frame'''
 
         # Check if a song name was entered
         song_name = fullname_entry.get()
-
-        # Check if the date is valid
-        # TODO Check if the date is valid
-        date_entry = id_entry.get()
 
         # Check if the minutes are valid:
         minutes = ""
@@ -241,80 +303,44 @@ def practice_screen():
                 minutes += char
 
         # If invalid minutes, else valid
-        # TODO add ELIF for invalid date
         if minutes == "":
             messagebox.showinfo("Error: invalid format: ", "Please enter a time in minutes. (ie. 15)")
             award_entry.delete(0, END)
-
         elif song_name == "":
             messagebox.showinfo("Error: no song name entered.", "Please enter a valid song name.")
         else:
-            # TODO while inserting data to the GUI, check for the entry in the data and update/add
-            song_set.insert(parent='', index='end', iid=count, text='',
-                            values=(date_entry, song_name, minutes))
-            count += 1
-
-            # clears entry fields
-            id_entry.delete(0, END)
-
-            # set current date to date entry field
-            id_entry.insert(0, day_string)
-
-            fullname_entry.delete(0, END)
-            award_entry.delete(0, END)
-
-    # Select Record
-    def select_record():
-
-        # clear entry boxes
-        id_entry.delete(0, END)
-        fullname_entry.delete(0, END)
-        award_entry.delete(0, END)
-
-        # grab record
-        selected = song_set.focus()
-
-        # grab record values
-        values = song_set.item(selected, 'values')
-
-        # output to entry boxes
-        id_entry.insert(0, values[0])
-        fullname_entry.insert(0, values[1])
-        award_entry.insert(0, values[2])
-
-    # save Record
-    def update_record():
-        selected = song_set.focus()
-
-        # save new data
-        song_set.item(selected, text="", values=(id_entry.get(), fullname_entry.get(), award_entry.get()))
-
-        # clear entry boxes
-        id_entry.delete(0, END)
-        fullname_entry.delete(0, END)
-        award_entry.delete(0, END)
-
-        # Default date resets to today
-        id_entry.insert(0, day_string)
+            # update user data dictionary
+            practice_table = data[username][2]
+            for ent in range(len(practice_table)):
+                entry = practice_table[ent]
+                if this_week[today.weekday()] == entry[0]:
+                    entry[1], entry[2] = fullname_entry.get(), int(award_entry.get())
+                    break
+                else:
+                    if ent == len(practice_table) - 1:
+                        data[username][2].append([id_entry.get(), fullname_entry.get(),
+                                                  int(award_entry.get())])
+                    else:
+                        continue
+            # save user data to database and refresh display
+            filename = "user_data"
+            output_file = open(filename, 'wb')
+            pickle.dump(data, output_file)
+            output_file.close()
+            load_entries(this_week)
+            print(f"\nUpdated data load for {username}:\n{data[username]}")
 
     # buttons
-    #To choose a session, click the practice session and press the button "Select Practice Session"
-    #To update a past entry, modify the entry as you desire, then press "Refresh practice calendar"
-    #For creating a new record, type information in box and then press "Update today's practice"
+    # To choose a session, click the practice session and press the button "Select Practice Session"
+    # To update a past entry, modify the entry as you desire, then press "Refresh practice calendar"
+    # For creating a new record, type information in box and then press "Update today's practice"
     button_frame = Frame(root)
     button_frame.grid(column=0, row=3)
 
-    input_button = Button(button_frame, text="Add new Practice Session", command=input_record)
+    input_button = Button(button_frame, text="Edit today's practice session", command=input_record)
     input_button.grid(column=0, row=0, pady=10)
-
-    select_button = Button(button_frame, text="Edit selected Practice Session", command=select_record)
-    select_button.grid(column=0, row=1, pady=10)
-
-    refresh_button = Button(button_frame, text="Submit Practice Session Changes", command=update_record)
-    refresh_button.grid(column=0, row=2, pady=10)
 
 
 # run inital login screen on boot
 main_screen()
 root.mainloop()
-
