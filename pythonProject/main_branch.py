@@ -28,6 +28,12 @@ def main_screen():
                           font="Raleway", bg="#275D38", fg="white", height=2, width=15)
     login_btn.grid(column=0, row=2)
 
+    #registration button
+    register_text = tk.StringVar()
+    register_text.set("Create New Account")
+    register_btn = tk.Button(root, textvariable=register_text, command=lambda: main_close_register(), font="Raleway", bg="#275D38", fg="white", height=2, width=15)
+    register_btn.grid(column=0, row=3)
+
     # logo
     logo = Image.open('images/PianoPractice.png')
     logo = logo.resize((600, 220))
@@ -38,17 +44,32 @@ def main_screen():
 
     def main_close():
         login_btn.destroy()
+        register_btn.destroy()
         logo_label.destroy()
         login_screen()
 
+
+    def main_close_register():
+        """
+        Closes main screen and opens registration screen
+        """
+        login_btn.destroy()
+        register_btn.destroy()
+        logo_label.destroy()
+        registration_screen()
 
 def login_screen():
     # login button
     login_text = tk.StringVar()
     login_text.set("Login")
-    login_btn = tk.Button(root, textvariable=login_text, command=lambda: login(),
-                          font="Raleway", bg="#275D38", fg="white", height=2, width=15)
+    login_btn = tk.Button(root, textvariable=login_text, command=lambda: login(), font="Raleway", bg="#275D38", fg="white", height=2, width=15)
     login_btn.grid(column=0, row=2)
+
+    # back-to-main-screen button
+    to_main_screen_text = tk.StringVar()
+    to_main_screen_text.set("Back")
+    to_main_screen_btn = tk.Button(root, textvariable=to_main_screen_text, command=lambda: to_main_screen(), font="Raleway", bg="#275D38", fg="white", height=2, width=15)
+    to_main_screen_btn.grid(column=0, row=3)
 
     # logo
     logo = Image.open('images/PianoPractice.png')
@@ -72,6 +93,17 @@ def login_screen():
     entry2 = Entry(login_frame, show="*", bd=5, width="50")
     entry2.grid(column=1, row=1, padx=10, pady=10)
 
+    def to_main_screen():
+        """
+        Closes the login screen and returns to the main screen
+        """
+        login_frame.destroy()
+        logo_label.destroy()
+        login_btn.destroy()
+        to_main_screen_btn.destroy()
+        main_screen()
+
+
     def login():
 
         global username
@@ -79,8 +111,8 @@ def login_screen():
         username = entry1.get()
         password = entry2.get()
 
-        if username == "" and password == "":
-            messagebox.showinfo("", "Please enter Username")
+        if username == "" or password == "":
+            messagebox.showinfo("", "Please enter Username and Password")
         elif (username == "Test" and password == "Test123") or (username == "x" and password == "x"):
             messagebox.showinfo("Login Successful", "Let's Practice!")
 
@@ -88,6 +120,7 @@ def login_screen():
             login_frame.destroy()
             logo_label.destroy()
             login_btn.destroy()
+            to_main_screen_btn.destroy()
 
             # load practice screen
             practice_screen()
@@ -95,6 +128,82 @@ def login_screen():
             messagebox.showinfo("", "Incorrect username and password. Please try again.")
 
     root.title("Piano Practice Login Screen")
+
+
+def registration_screen():
+    root.title("Piano Practice New Account Registration Screen")
+
+    # registration button
+    register_text = tk.StringVar()
+    register_text.set("Register Now")
+    register_btn = tk.Button(root, textvariable=register_text, command=lambda: register(), font="Raleway", bg="#275D38",
+                          fg="white", height=2, width=15)
+    register_btn.grid(column=0, row=2)
+
+    # back-to-main-screen button
+    to_main_screen_text = tk.StringVar()
+    to_main_screen_text.set("Back")
+    to_main_screen_btn = tk.Button(root, textvariable=to_main_screen_text, command=lambda: to_main_screen(),
+                                   font="Raleway", bg="#275D38", fg="white", height=2, width=15)
+    to_main_screen_btn.grid(column=0, row=3)
+
+    # logo
+    logo = Image.open('images/PianoPractice.png')
+    logo = logo.resize((600, 220))
+    logo = ImageTk.PhotoImage(logo)
+    logo_label = tk.Label(image=logo)
+    logo_label.image = logo
+    logo_label.grid(column=0, row=0)
+
+    # Registration fields
+    register_frame = tk.Frame(root)
+    register_frame.grid(column=0, row=1)
+    user_lbl = Label(register_frame, text="New username", font="50", fg="#275D38")
+    user_lbl.grid(column=0, row=0, padx=10, pady=10)
+    pass_lbl = Label(register_frame, text="New password", font="50", fg="#275D38")
+    pass_lbl.grid(column=0, row=1, padx=10, pady=10)
+
+    entry1 = Entry(register_frame, bd=5, width="50")
+    entry1.grid(column=1, row=0, padx=10, pady=10)
+
+    entry2 = Entry(register_frame, show="*", bd=5, width="50")
+    entry2.grid(column=1, row=1, padx=10, pady=10)
+
+
+    def to_main_screen():
+        """
+        Closes the login screen and returns to the main screen
+        """
+        register_frame.destroy()
+        logo_label.destroy()
+        register_btn.destroy()
+        to_main_screen_btn.destroy()
+        main_screen()
+
+    def register():
+        global username
+        # get values from entry fields
+        username = entry1.get()
+        password = hash(entry2.get())    #hashes password
+
+        if username == "" or password == "":
+            messagebox.showinfo("", "Please enter Username and password")
+
+        # elif: (if username already exists, print message saying so)
+
+        else:
+            # Put username and hashed password in the database. Still need to implement.
+
+            messagebox.showinfo("New user registration successful.", "Let's Practice!")
+
+            # remove old widgets
+            register_frame.destroy()
+            logo_label.destroy()
+            register_btn.destroy()
+            to_main_screen_btn.destroy()
+
+            # load practice screen
+            # practice_screen()
 
 
 def practice_screen():
