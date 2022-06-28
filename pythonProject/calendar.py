@@ -101,7 +101,18 @@ def update_record():
     id_entry.delete(0,END)
     fullname_entry.delete(0,END)
     award_entry.delete(0,END)
-     
+
+def popup_warning():
+    
+
+def delete_record():
+    selected = set.focus()
+    set.item(selected, values=(id_entry.delete(0,END), fullname_entry.delete(0,END), award_entry.delete(0,END)))
+
+
+
+
+
 #button
 #To choose a session, click the practice session and press the button "Select Practice Session"
 #To update a past entry, modify the entry as you desire, then press "Refresh practice calendar"
