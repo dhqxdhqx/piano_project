@@ -18,7 +18,7 @@ WIDTH = 650
 HEIGHT = 800
 canvas = tk.Canvas(root, width=WIDTH, height=HEIGHT)
 canvas.grid(columnspan=1, rowspan=6)
-
+#A random comment
 
 def main_screen():
     # login button
