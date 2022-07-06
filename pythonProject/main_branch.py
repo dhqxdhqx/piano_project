@@ -18,7 +18,7 @@ WIDTH = 650
 HEIGHT = 800
 canvas = tk.Canvas(root, width=WIDTH, height=HEIGHT)
 canvas.grid(columnspan=1, rowspan=6)
-#A random comment
+
 
 def main_screen():
     # login button
@@ -57,6 +57,28 @@ def main_screen():
         register_btn.destroy()
         logo_label.destroy()
         registration_screen()
+
+
+def encrypt_password(text):
+    """
+    Function to encrypt/hash password
+    """
+    result = ""
+    for char in text:
+        # Encrypt uppercase characters in plain text
+        if ord(char) > 75:
+            if ord(char) % 3 == 0:
+                ord_char = (ord(char) - 12)
+            else:
+                ord_char = (ord(char) - 21)
+        else:
+            if ord(char) % 4 == 0:
+                ord_char = (ord(char) + 7)
+            else:
+                ord_char = (ord(char) + 18)
+
+        result += chr(ord_char)
+    return result
 
 def login_screen():
     # login button
@@ -109,13 +131,22 @@ def login_screen():
         global username
         # get values from entry fields
         username = entry1.get()
-        password = entry2.get()
+        password = encrypt_password(entry2.get())
+
+        #Accessing data in database
+        filename = "user_data"
+        if not exists(filename): # If sample database has not been created
+            create_sample_database.create_database()
+        database_file = open(filename, 'rb')
+        data = pickle.load(database_file)
 
         if username == "" or password == "":
             messagebox.showinfo("", "Please enter Username and Password")
-        elif (username == "Test" and password == "Test123") or (username == "x" and password == "x"):
-            messagebox.showinfo("Login Successful", "Let's Practice!")
 
+        # If username and password are in database
+
+        elif (username in data.keys()) and (password == data[username][0]):
+            database_file.close()
             # remove old widgets
             login_frame.destroy()
             logo_label.destroy()
@@ -124,8 +155,10 @@ def login_screen():
 
             # load practice screen
             practice_screen()
+            messagebox.showinfo("Login Successful", "Let's Practice!")
+
         else:
-            messagebox.showinfo("", "Incorrect username and password. Please try again.")
+            messagebox.showinfo("", "Incorrect username and/or password. Please try again.")
 
     root.title("Piano Practice Login Screen")
 
@@ -184,17 +217,31 @@ def registration_screen():
         global username
         # get values from entry fields
         username = entry1.get()
-        password = hash(entry2.get())    #hashes password
+        password = encrypt_password(entry2.get())    # Hashes password
+
+        #Accessing data in database
+        filename = "user_data"
+        if not exists(filename): # If sample database has not been created
+            create_sample_database.create_database()
+        database_file = open(filename, 'rb')
+        data = pickle.load(database_file)
 
         if username == "" or password == "":
             messagebox.showinfo("", "Please enter Username and password")
 
-        # elif: (if username already exists, print message saying so)
+        elif username in data.keys():
+            # if username already exists, print message saying so
+            messagebox.showinfo("", "Username already in use. Please choose a different username.")
 
         else:
-            # Put username and hashed password in the database. Still need to implement.
+            database_file.close()
+            # Success: Put username and hashed password in the database.
+            data[username] = [password, 0, [[date.today().strftime("%a, %B %d"), "", 0]]]
+            database_file = open(filename, 'wb')
+            pickle.dump(data, database_file)
+            database_file.close()
 
-            messagebox.showinfo("New user registration successful.", "Let's Practice!")
+            messagebox.showinfo("Registration Successful", "New user registration successful. Let's Practice!")
 
             # remove old widgets
             register_frame.destroy()
@@ -203,7 +250,7 @@ def registration_screen():
             to_main_screen_btn.destroy()
 
             # load practice screen
-            # practice_screen()
+            practice_screen()
 
 
 def practice_screen():
@@ -380,7 +427,7 @@ def practice_screen():
     id_entry.insert(0, day_string)
     id_entry.config(state='readonly')
 
-    # Beginning selection is set to current date
+    # Beginning selection is set to current date, if exists
     selected = song_set.get_children()[today.weekday()]
     song_set.focus(selected)
     song_set.selection_set(selected)
@@ -397,6 +444,7 @@ def practice_screen():
     award_entry = Entry(input_frame)
     award_entry.grid(row=1, column=2)
     award_entry.insert(0, values[2][:-8])
+
 
     # functionality to input a new song record
     def input_record():
