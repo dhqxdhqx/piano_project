@@ -22,6 +22,7 @@ canvas.grid(columnspan=1, rowspan=6)
 
 def main_screen():
     # login button
+    root.title("UVU Piano Practice")
     login_text = tk.StringVar()
     login_text.set("Login Now")
     login_btn = tk.Button(root, textvariable=login_text, command=lambda: main_close(),
@@ -290,10 +291,13 @@ def practice_screen():
     def user_menu():
 
         user_menu_window = Toplevel(root)
+        layout = tk.Canvas(user_menu_window, width=300, height=200)
+        user_menu_window.title("User Menu")
+        layout.grid(columnspan=1, rowspan=3)
         user_menu_window.grab_set()
         logout_btn = tk.Button(user_menu_window, text="Log Out", command=lambda: logout(), font="Raleway", bg="#275D38",
                                fg="white", height=2, width=15)
-        logout_btn.pack()
+        logout_btn.grid(column=0,row=0)
 
         def logout():
             logout_msgbox = messagebox.askquestion("Logout", "Do you want to logout?", icon='warning')
