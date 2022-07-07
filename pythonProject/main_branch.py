@@ -31,7 +31,7 @@ def main_screen():
     #registration button
     register_text = tk.StringVar()
     register_text.set("Create New Account")
-    register_btn = tk.Button(root, textvariable=register_text, command=lambda: main_close_register(), font="Raleway", bg="#275D38", fg="white", height=2, width=15)
+    register_btn = tk.Button(root, textvariable=register_text, command=lambda: main_close_register(), font="Raleway", bg="#275D38", fg="white", height=2, width=20)
     register_btn.grid(column=0, row=3)
 
     # logo
