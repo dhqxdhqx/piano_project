@@ -22,6 +22,7 @@ canvas.grid(columnspan=1, rowspan=6)
 
 def main_screen():
     # login button
+    root.title("UVU Piano Practice")
     login_text = tk.StringVar()
     login_text.set("Login Now")
     login_btn = tk.Button(root, textvariable=login_text, command=lambda: main_close(),
