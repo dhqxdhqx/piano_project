@@ -1,6 +1,6 @@
-from tkinter import *
+# from tkinter import *
 import tkinter as tk
-from tkinter.ttk import Treeview
+from tkinter import ttk
 from PIL import Image, ImageTk
 from tkinter import messagebox
 import pickle
@@ -29,10 +29,11 @@ def main_screen():
                           font="Raleway", bg="#275D38", fg="white", height=2, width=15)
     login_btn.grid(column=0, row=2)
 
-    #registration button
+    #  registration button
     register_text = tk.StringVar()
     register_text.set("Create New Account")
-    register_btn = tk.Button(root, textvariable=register_text, command=lambda: main_close_register(), font="Raleway", bg="#275D38", fg="white", height=2, width=20)
+    register_btn = tk.Button(root, textvariable=register_text, command=lambda: main_close_register(), font="Raleway",
+                             bg="#275D38", fg="white", height=2, width=20)
     register_btn.grid(column=0, row=3)
 
     # logo
@@ -48,7 +49,6 @@ def main_screen():
         register_btn.destroy()
         logo_label.destroy()
         login_screen()
-
 
     def main_close_register():
         """
@@ -81,17 +81,20 @@ def encrypt_password(text):
         result += chr(ord_char)
     return result
 
+
 def login_screen():
     # login button
     login_text = tk.StringVar()
     login_text.set("Login")
-    login_btn = tk.Button(root, textvariable=login_text, command=lambda: login(), font="Raleway", bg="#275D38", fg="white", height=2, width=15)
+    login_btn = tk.Button(root, textvariable=login_text, command=lambda: login(), font="Raleway", bg="#275D38",
+                          fg="white", height=2, width=15)
     login_btn.grid(column=0, row=2)
 
     # back-to-main-screen button
     to_main_screen_text = tk.StringVar()
     to_main_screen_text.set("Back")
-    to_main_screen_btn = tk.Button(root, textvariable=to_main_screen_text, command=lambda: to_main_screen(), font="Raleway", bg="#275D38", fg="white", height=2, width=15)
+    to_main_screen_btn = tk.Button(root, textvariable=to_main_screen_text, command=lambda: to_main_screen(),
+                                   font="Raleway", bg="#275D38", fg="white", height=2, width=15)
     to_main_screen_btn.grid(column=0, row=3)
 
     # logo
@@ -105,15 +108,15 @@ def login_screen():
     # Login Buttons
     login_frame = tk.Frame(root)
     login_frame.grid(column=0, row=1)
-    user_lbl = Label(login_frame, text="Username", font="50", fg="#275D38")
+    user_lbl = tk.Label(login_frame, text="Username", font="50", fg="#275D38")
     user_lbl.grid(column=0, row=0, padx=10, pady=10)
-    pass_lbl = Label(login_frame, text="Password", font="50", fg="#275D38")
+    pass_lbl = tk.Label(login_frame, text="Password", font="50", fg="#275D38")
     pass_lbl.grid(column=0, row=1, padx=10, pady=10)
 
-    entry1 = Entry(login_frame, bd=5, width="50")
+    entry1 = tk.Entry(login_frame, bd=5, width="50")
     entry1.grid(column=1, row=0, padx=10, pady=10)
 
-    entry2 = Entry(login_frame, show="*", bd=5, width="50")
+    entry2 = tk.Entry(login_frame, show="*", bd=5, width="50")
     entry2.grid(column=1, row=1, padx=10, pady=10)
 
     def to_main_screen():
@@ -126,7 +129,6 @@ def login_screen():
         to_main_screen_btn.destroy()
         main_screen()
 
-
     def login():
 
         global username
@@ -134,9 +136,9 @@ def login_screen():
         username = entry1.get()
         password = encrypt_password(entry2.get())
 
-        #Accessing data in database
+        # Accessing data in database
         filename = "user_data"
-        if not exists(filename): # If sample database has not been created
+        if not exists(filename):  # If sample database has not been created
             create_sample_database.create_database()
         database_file = open(filename, 'rb')
         data = pickle.load(database_file)
@@ -171,7 +173,7 @@ def registration_screen():
     register_text = tk.StringVar()
     register_text.set("Register Now")
     register_btn = tk.Button(root, textvariable=register_text, command=lambda: register(), font="Raleway", bg="#275D38",
-                          fg="white", height=2, width=15)
+                             fg="white", height=2, width=15)
     register_btn.grid(column=0, row=2)
 
     # back-to-main-screen button
@@ -192,17 +194,16 @@ def registration_screen():
     # Registration fields
     register_frame = tk.Frame(root)
     register_frame.grid(column=0, row=1)
-    user_lbl = Label(register_frame, text="New username", font="50", fg="#275D38")
+    user_lbl = tk.Label(register_frame, text="New username", font="50", fg="#275D38")
     user_lbl.grid(column=0, row=0, padx=10, pady=10)
-    pass_lbl = Label(register_frame, text="New password", font="50", fg="#275D38")
+    pass_lbl = tk.Label(register_frame, text="New password", font="50", fg="#275D38")
     pass_lbl.grid(column=0, row=1, padx=10, pady=10)
 
-    entry1 = Entry(register_frame, bd=5, width="50")
+    entry1 = tk.Entry(register_frame, bd=5, width="50")
     entry1.grid(column=1, row=0, padx=10, pady=10)
 
-    entry2 = Entry(register_frame, show="*", bd=5, width="50")
+    entry2 = tk.Entry(register_frame, show="*", bd=5, width="50")
     entry2.grid(column=1, row=1, padx=10, pady=10)
-
 
     def to_main_screen():
         """
@@ -218,11 +219,11 @@ def registration_screen():
         global username
         # get values from entry fields
         username = entry1.get()
-        password = encrypt_password(entry2.get())    # Hashes password
+        password = encrypt_password(entry2.get())  # Hashes password
 
-        #Accessing data in database
+        # Accessing data in database
         filename = "user_data"
-        if not exists(filename): # If sample database has not been created
+        if not exists(filename):  # If sample database has not been created
             create_sample_database.create_database()
         database_file = open(filename, 'rb')
         data = pickle.load(database_file)
@@ -290,14 +291,14 @@ def practice_screen():
     # action when user name is clicked
     def user_menu():
 
-        user_menu_window = Toplevel(root)
+        user_menu_window = tk.Toplevel(root)
         layout = tk.Canvas(user_menu_window, width=300, height=200)
         user_menu_window.title("User Menu")
         layout.grid(columnspan=1, rowspan=3)
         user_menu_window.grab_set()
         logout_btn = tk.Button(user_menu_window, text="Log Out", command=lambda: logout(), font="Raleway", bg="#275D38",
                                fg="white", height=2, width=15)
-        logout_btn.grid(column=0,row=0)
+        logout_btn.grid(column=0, row=0)
 
         def logout():
             logout_msgbox = messagebox.askquestion("Logout", "Do you want to logout?", icon='warning')
@@ -316,7 +317,7 @@ def practice_screen():
     record_frame.grid(column=0, row=1)
 
     # data frame object
-    song_set = Treeview(record_frame)
+    song_set = ttk.Treeview(record_frame)
     song_set.pack()
 
     # # Add a scrollbar
@@ -326,18 +327,18 @@ def practice_screen():
 
     # set up columns in data frame
     song_set['columns'] = ('date', 'song', 'time')
-    song_set.column("#0", width=0, stretch=NO)
-    song_set.column("date", anchor=CENTER, width=150)
-    song_set.column("song", anchor=CENTER, width=150)
-    song_set.column("time", anchor=CENTER, width=150)
+    song_set.column("#0", width=0, stretch=tk.NO)
+    song_set.column("date", anchor=tk.CENTER, width=150)
+    song_set.column("song", anchor=tk.CENTER, width=150)
+    song_set.column("time", anchor=tk.CENTER, width=150)
 
-    song_set.heading("#0", text="", anchor=CENTER)
-    song_set.heading("date", text="Date", anchor=CENTER)
-    song_set.heading("song", text="Song", anchor=CENTER)
-    song_set.heading("time", text="Minutes Practiced", anchor=CENTER)
+    song_set.heading("#0", text="", anchor=tk.CENTER)
+    song_set.heading("date", text="Date", anchor=tk.CENTER)
+    song_set.heading("song", text="Song", anchor=tk.CENTER)
+    song_set.heading("time", text="Minutes Practiced", anchor=tk.CENTER)
 
     # overall minutes display
-    minutes_frame = Frame(root)
+    minutes_frame = tk.Frame(root)
     minutes_frame.grid(column=0, row=5)
 
     # Create the current week to populate the date data field
@@ -396,10 +397,10 @@ def practice_screen():
     def minutes_help(total, remain):
         '''Receives weekly total minutes and remaining minutes,
            then displays them at bottom of screen.'''
-        Label(minutes_frame, text=f"Total Minutes: {total}", font="Raleway",
-              bg="white", fg="black", height=2, width=20).grid(column=0, row=0, sticky='w')
-        Label(minutes_frame, text=f"Minutes to Reward: {remain}", font="Raleway",
-              bg="white", fg="black", height=2, width=20).grid(column=2, row=0, sticky='e')
+        tk.Label(minutes_frame, text=f"Total Minutes: {total}", font="Raleway",
+                 bg="white", fg="black", height=2, width=20).grid(column=0, row=0, sticky='w')
+        tk.Label(minutes_frame, text=f"Minutes to Reward: {remain}", font="Raleway",
+                 bg="white", fg="black", height=2, width=20).grid(column=2, row=0, sticky='e')
 
     # creates dictionary from dat file
     data = load_entries(this_week)
@@ -410,18 +411,18 @@ def practice_screen():
     input_frame.grid(column=0, row=2)
 
     # input labels
-    id = Label(input_frame, text="Date", fg="green")
+    id = tk.Label(input_frame, text="Date", fg="green")
     id.grid(row=0, column=0)
 
-    full_Name = Label(input_frame, text="Song Name", fg="green")
+    full_Name = tk.Label(input_frame, text="Song Name", fg="green")
     full_Name.grid(row=0, column=1)
 
-    award = Label(input_frame, text="Time in minutes", fg="green")
+    award = tk.Label(input_frame, text="Time in minutes", fg="green")
     award.grid(row=0, column=2)
 
     # SONG DATE
     # song data input entry fields
-    id_entry = Entry(input_frame)
+    id_entry = tk.Entry(input_frame)
     id_entry.grid(row=1, column=0)
 
     # set current date to date entry field
@@ -440,15 +441,14 @@ def practice_screen():
     values = song_set.item(today.weekday(), 'values')
 
     # SONG NAME
-    fullname_entry = Entry(input_frame)
+    fullname_entry = tk.Entry(input_frame)
     fullname_entry.grid(row=1, column=1)
     fullname_entry.insert(0, values[1])
 
     # SONG TIME PRACTICED
-    award_entry = Entry(input_frame)
+    award_entry = tk.Entry(input_frame)
     award_entry.grid(row=1, column=2)
     award_entry.insert(0, values[2][:-8])
-
 
     # functionality to input a new song record
     def input_record():
@@ -466,21 +466,22 @@ def practice_screen():
         # If invalid minutes, else valid
         if minutes == "":
             messagebox.showinfo("Error: invalid format: ", "Please enter a time in minutes. (ie. 15)")
-            award_entry.delete(0, END)
+            award_entry.delete(0, tk.END)
         elif song_name == "":
             messagebox.showinfo("Error: no song name entered.", "Please enter a valid song name.")
         else:
-            # update user data dictionary
+            #  update user data dictionary
+            #  please use minutes variable instead of award_entry.get(), minutes has gone through a digit check
             practice_table = data[username][2]
             for ent in range(len(practice_table)):
                 entry = practice_table[ent]
                 if this_week[today.weekday()] == entry[0]:
-                    entry[1], entry[2] = fullname_entry.get(), int(award_entry.get())
+                    entry[1], entry[2] = fullname_entry.get(), int(minutes)
                     break
                 else:
                     if ent == len(practice_table) - 1:
                         data[username][2].append([id_entry.get(), fullname_entry.get(),
-                                                  int(award_entry.get())])
+                                                  int(minutes)])
                     else:
                         continue
             # save user data to database and refresh display
@@ -495,10 +496,10 @@ def practice_screen():
     # To choose a session, click the practice session and press the button "Select Practice Session"
     # To update a past entry, modify the entry as you desire, then press "Refresh practice calendar"
     # For creating a new record, type information in box and then press "Update today's practice"
-    button_frame = Frame(root)
+    button_frame = tk.Frame(root)
     button_frame.grid(column=0, row=3)
 
-    input_button = Button(button_frame, text="Edit today's practice session", command=input_record)
+    input_button = tk.Button(button_frame, text="Edit today's practice session", command=input_record)
     input_button.grid(column=0, row=0, pady=10)
 
 
