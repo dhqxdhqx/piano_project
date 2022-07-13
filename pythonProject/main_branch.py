@@ -169,19 +169,28 @@ def login_screen():
 def registration_screen():
     root.title("Piano Practice New Account Registration Screen")
 
+    # user account type selection
+    user_var = tk.IntVar()
+    user_type = tk.Label(root, text="Account type:", font="50", fg="#275D38")
+    user_type.grid(column=0, row=2)
+    student_user = tk.Radiobutton(text="Student", font="50", fg="#275D38",variable=user_var, value=0)
+    student_user.grid(column=0, row=3,sticky='n')
+    teacher_user = tk.Radiobutton(text="Teacher", font="50", fg="#275D38",variable=user_var, value=1)
+    teacher_user.grid(column=0, row=3,sticky='s')
+
     # registration button
     register_text = tk.StringVar()
     register_text.set("Register Now")
     register_btn = tk.Button(root, textvariable=register_text, command=lambda: register(), font="Raleway", bg="#275D38",
                              fg="white", height=2, width=15)
-    register_btn.grid(column=0, row=2)
+    register_btn.grid(column=0, row=4)
 
     # back-to-main-screen button
     to_main_screen_text = tk.StringVar()
     to_main_screen_text.set("Back")
     to_main_screen_btn = tk.Button(root, textvariable=to_main_screen_text, command=lambda: to_main_screen(),
                                    font="Raleway", bg="#275D38", fg="white", height=2, width=15)
-    to_main_screen_btn.grid(column=0, row=3)
+    to_main_screen_btn.grid(column=0, row=5)
 
     # logo
     logo = Image.open('images/PianoPractice.png')
@@ -213,6 +222,9 @@ def registration_screen():
         logo_label.destroy()
         register_btn.destroy()
         to_main_screen_btn.destroy()
+        user_type.destroy()
+        student_user.destroy()
+        teacher_user.destroy()
         main_screen()
 
     def register():
@@ -236,6 +248,8 @@ def registration_screen():
             messagebox.showinfo("", "Username already in use. Please choose a different username.")
 
         else:
+            acc_type = user_var.get()
+            print(acc_type) # *************temp print to verify new account type: 0=student, 1=teacher**************************
             database_file.close()
             # Success: Put username and hashed password in the database.
             data[username] = [password, 0, [[date.today().strftime("%a, %B %d"), "", 0]]]
@@ -250,6 +264,9 @@ def registration_screen():
             logo_label.destroy()
             register_btn.destroy()
             to_main_screen_btn.destroy()
+            user_type.destroy()
+            student_user.destroy()
+            teacher_user.destroy()
 
             # load practice screen
             practice_screen()
