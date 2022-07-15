@@ -174,6 +174,7 @@ def registration_screen():
     user_var = tk.IntVar()
     user_type = tk.Label(root, text="Account type:", font="50", fg="#275D38")
     user_type.grid(column=0, row=2)
+
     student_user = tk.Radiobutton(text="Student", font="50", fg="#275D38", variable=user_var, value=0)
     student_user.grid(column=0, row=3, sticky='n')
     teacher_user = tk.Radiobutton(text="Teacher", font="50", fg="#275D38", variable=user_var, value=1)
@@ -253,6 +254,7 @@ def registration_screen():
             acc_type = user_var.get()
             print(
                 acc_type)  # *************temp print to verify new account type: 0=student, 1=teacher**************************
+
             database_file.close()
             # Success: Put username and hashed password in the database.
             data[username] = [password, 0, [[date.today().strftime("%a, %B %d"), "", 0]]]
