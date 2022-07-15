@@ -189,7 +189,8 @@ def registration_screen():
         if username == "" or password == "":
             messagebox.showinfo("", "Please enter Username and password")
 
-        # elif: (if username already exists, print message saying so)
+        elif username == "Test" or username == "x": #Test and x are temporary placeholders, once I debug it will compare username entry to previously entered usernames and prevent duplicates
+            messagebox.showinfo("", "This username already exists, please try again or Login") 
 
         else:
             # Put username and hashed password in the database. Still need to implement.
