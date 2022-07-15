@@ -267,7 +267,7 @@ def registration_screen():
 
             # Success: Put username, hashed password, user type in the database.
 
-            if account_type == 0:  #If student
+            if account_type == 0:  # If student
                 database_file.close()
                 data[username] = [password, account_type, 0, [[date.today().strftime("%a, %B %d"), "", 0]]]
                 # TODO: if we make it so student can select their teacher, change so that the student is only added to that teacher's list
@@ -278,7 +278,8 @@ def registration_screen():
                 database_file = open(filename, 'wb')
                 pickle.dump(data, database_file)
                 database_file.close()
-                messagebox.showinfo("Registration Successful", "New student user registration successful. Let's Practice!")
+                messagebox.showinfo("Registration Successful",
+                                    "New student user registration successful. Let's Practice!")
 
             elif account_type == 1:  # If teacher
                 student_list = []
@@ -294,6 +295,7 @@ def registration_screen():
 
             # load practice info screen
             practice_screen(account_type)
+
 
 def practice_screen(user_type):
     # part that is same for teachers and students
@@ -360,7 +362,6 @@ def practice_screen(user_type):
     song_set = ttk.Treeview(record_frame)
     song_set.pack()
 
-
     # # Add a scrollbar
     # scrollbar = tk.ttk.Scrollbar(root, orient=tk.VERTICAL, command=song_set.yview)
     # song_set.configure(yscroll=scrollbar.set)
@@ -397,7 +398,6 @@ def practice_screen(user_type):
 
         students_list = data[username][2]
 
-
         def scan_list(event):
             val = event.widget.get()
             print(val)
@@ -426,15 +426,16 @@ def practice_screen(user_type):
         update(students_list)
 
         def student_button():
-            '''button that is clicked for select student'''
+            """button that is clicked for select student"""
             entry.grid(column=0, row=1)
             student_dropdown.grid(column=0, row=2)
 
-        select_student = tk.Button(teacher_frame, text="Select a student", bg="#275D38", fg='white', command=student_button)
+        select_student = tk.Button(teacher_frame, text="Select a student", bg="#275D38", fg='white',
+                                   command=student_button)
         select_student.grid(column=0, row=0)
 
         def student_selected(event):
-            '''handles student selected from student_dropdown Listbox item'''
+            """handles student selected from student_dropdown Listbox item"""
             selected = student_dropdown.get(tk.ANCHOR)
             print(selected)
             entry.delete(0, tk.END)
@@ -443,29 +444,31 @@ def practice_screen(user_type):
             student_dropdown.grid_remove()
             week_dropdown_f(selected)
 
-
         student_dropdown.bind('<<ListboxSelect>>', student_selected)
 
         def week_dropdown_f(student):
+            """ function that manages the weekdropdown """
 
             def week_selected():
+                ''' button command for select_week'''
                 selected_week = week_dropdown.get(tk.ANCHOR)
                 print("week was selected: ", selected_week)
 
             # Pull up the week menu
             print("Student ", student, "was selected-")
-            select_week = tk.Button(teacher_frame, text="Select a week", bg="#275D38", fg='white', command=week_selected)
+            select_week = tk.Button(teacher_frame, text="Select a week", bg="#275D38", fg='white',
+                                    command=week_selected)
             select_week.grid(column=1, row=0)
 
             # TODO: remove test_week and use actual practice weeks of the selected student.
             test_week = ["06/19/22-07/25/22", "06/26/22-07/02/22", "07/03/22-07/09/22", "07/10/22-07/16/22"]
 
             week_dropdown = tk.Listbox(teacher_frame, bg='gray', fg='white', selectbackground="#275D38",
-                                      selectmode='single')
+                                       selectmode='single')
             for items in test_week:
                 week_dropdown.insert('end', items)
             week_dropdown.grid(column=1, row=2)
-
+            week_dropdown.selection_set(first=0)
 
     def student_page():
         # Create the current week to populate the date data field
@@ -633,6 +636,7 @@ def practice_screen(user_type):
         student_page()
     else:  # If a teacher
         teacher_dropdowns()
+
 
 # run inital login screen on boot
 main_screen()
