@@ -12,7 +12,6 @@ import create_sample_database
 # for setting default date as today
 from datetime import date, timedelta
 
-#  Testing pull request Vanessa's branch
 root = tk.Tk()
 
 WIDTH = 650
@@ -150,6 +149,8 @@ def login_screen():
         # If username and password are in database
 
         elif (username in data.keys()) and (password == data[username][0]):
+            user_type = data[username][1]
+
             database_file.close()
             # remove old widgets
             login_frame.destroy()
@@ -158,8 +159,11 @@ def login_screen():
             to_main_screen_btn.destroy()
 
             # load practice screen
-            practice_screen()
-            messagebox.showinfo("Login Successful", "Let's Practice!")
+            practice_screen(user_type)
+            if user_type == 0:
+                messagebox.showinfo("Login Successful", "Let's Practice!")
+            else:
+                messagebox.showinfo("Login Successful", "Teacher login successful.")
 
         else:
             messagebox.showinfo("", "Incorrect username and/or password. Please try again.")
@@ -234,6 +238,8 @@ def registration_screen():
         # get values from entry fields
         username = entry1.get()
         password = encrypt_password(entry2.get())  # Hashes password
+        account_type = int(user_var.get())
+        print(account_type)  # *************temp print to verify new account type: 0=student, 1=teacher*******
 
         # Accessing data in database
         filename = "user_data"
@@ -250,20 +256,6 @@ def registration_screen():
             messagebox.showinfo("", "Username already in use. Please choose a different username.")
 
         else:
-            global acc_type  # TODO made global for testing purposes in practice_screen()
-            acc_type = user_var.get()
-            print(
-                acc_type)  # *************temp print to verify new account type: 0=student, 1=teacher**************************
-
-            database_file.close()
-            # Success: Put username and hashed password in the database.
-            data[username] = [password, 0, [[date.today().strftime("%a, %B %d"), "", 0]]]
-            database_file = open(filename, 'wb')
-            pickle.dump(data, database_file)
-            database_file.close()
-
-            messagebox.showinfo("Registration Successful", "New user registration successful. Let's Practice!")
-
             # remove old widgets
             register_frame.destroy()
             logo_label.destroy()
@@ -273,14 +265,37 @@ def registration_screen():
             student_user.destroy()
             teacher_user.destroy()
 
-            # load practice screen
-            practice_screen()
+            # Success: Put username, hashed password, user type in the database.
 
+            if account_type == 0:  #If student
+                database_file.close()
+                data[username] = [password, account_type, 0, [[date.today().strftime("%a, %B %d"), "", 0]]]
+                # TODO: if we make it so student can select their teacher, change so that the student is only added to that teacher's list
+                # Putting student's username in the list of students for each teacher
+                for key, value in data.items():
+                    if value[1] == 1:  # If the user is a teacher
+                        value[2].append(username)
+                database_file = open(filename, 'wb')
+                pickle.dump(data, database_file)
+                database_file.close()
+                messagebox.showinfo("Registration Successful", "New student user registration successful. Let's Practice!")
 
-def practice_screen(user_type=1):
-    # TODO argument set to default 0 for student, change to pass in a variable once database is updated
-    # TODO 0 for student, 1 for teacher
+            elif account_type == 1:  # If teacher
+                student_list = []
+                for key, value in data.items():
+                    if value[1] == 0:  # If user entry is a student
+                        student_list.append(key)  # Append their username to the student_list
+                database_file.close()
+                data[username] = [password, account_type, student_list]
+                database_file = open(filename, 'wb')
+                pickle.dump(data, database_file)
+                database_file.close()
+                messagebox.showinfo("Registration Successful", "New teacher user registration successful!")
 
+            # load practice info screen
+            practice_screen(account_type)
+
+def practice_screen(user_type):
     # part that is same for teachers and students
     # frame to hold logo and user_frame
     top_frame = tk.Frame(root)
@@ -332,8 +347,7 @@ def practice_screen(user_type=1):
                 user_menu_window.grab_release()
                 top_frame.destroy()
                 record_frame.destroy()
-                input_frame.destroy()
-                button_frame.destroy()
+                user_frame.destroy()
                 user_menu_window.destroy()
                 minutes_frame.destroy()
                 main_screen()
@@ -345,6 +359,7 @@ def practice_screen(user_type=1):
     # data frame object
     song_set = ttk.Treeview(record_frame)
     song_set.pack()
+
 
     # # Add a scrollbar
     # scrollbar = tk.ttk.Scrollbar(root, orient=tk.VERTICAL, command=song_set.yview)
@@ -373,7 +388,14 @@ def practice_screen(user_type=1):
         teacher_frame = tk.Frame(root)
         teacher_frame.grid(column=0, row=2)
 
-        test_users = ["Bob", "Chris", "Emma", "Marty", "Frankenstein"]
+        filename = "user_data"
+        # Check if sample database has been created:
+        if not exists(filename):
+            create_sample_database.create_database()
+        output_file = open(filename, 'rb')
+        data = pickle.load(output_file)
+
+        students_list = data[username][2]
 
 
         def scan_list(event):
@@ -381,10 +403,10 @@ def practice_screen(user_type=1):
             print(val)
 
             if val == '':
-                students = test_users
+                students = students_list
             else:
                 students = []
-                for item in test_users:
+                for item in students_list:
                     if val.lower() in item.lower():
                         students.append(item)
             update(students)
@@ -401,7 +423,7 @@ def practice_screen(user_type=1):
         entry.bind('<KeyRelease>', scan_list)
         student_dropdown = tk.Listbox(teacher_frame, bg='gray', fg='white', selectbackground="#275D38",
                                       selectmode='single')
-        update(test_users)
+        update(students_list)
 
         def student_button():
             '''button that is clicked for select student'''
@@ -435,6 +457,7 @@ def practice_screen(user_type=1):
             select_week = tk.Button(teacher_frame, text="Select a week", bg="#275D38", fg='white', command=week_selected)
             select_week.grid(column=1, row=0)
 
+            # TODO: remove test_week and use actual practice weeks of the selected student.
             test_week = ["06/19/22-07/25/22", "06/26/22-07/02/22", "07/03/22-07/09/22", "07/10/22-07/16/22"]
 
             week_dropdown = tk.Listbox(teacher_frame, bg='gray', fg='white', selectbackground="#275D38",
@@ -472,7 +495,7 @@ def practice_screen(user_type=1):
 
             output_file = open(filename, 'rb')
             data = pickle.load(output_file)
-            total, remain, practice_table = 0, data[username][1], data[username][2]
+            total, remain, practice_table = 0, data[username][2], data[username][3]
 
             # clear table
             for item in song_set.get_children():
@@ -576,7 +599,7 @@ def practice_screen(user_type=1):
             else:
                 #  update user data dictionary
                 #  please use minutes variable instead of award_entry.get(), minutes has gone through a digit check
-                practice_table = data[username][2]
+                practice_table = data[username][3]
                 for ent in range(len(practice_table)):
                     entry = practice_table[ent]
                     if this_week[today.weekday()] == entry[0]:
@@ -584,7 +607,7 @@ def practice_screen(user_type=1):
                         break
                     else:
                         if ent == len(practice_table) - 1:
-                            data[username][2].append([id_entry.get(), fullname_entry.get(),
+                            data[username][3].append([id_entry.get(), fullname_entry.get(),
                                                       int(minutes)])
                         else:
                             continue
@@ -606,9 +629,9 @@ def practice_screen(user_type=1):
         input_button = tk.Button(button_frame, text="Edit today's practice session", command=input_record)
         input_button.grid(column=0, row=0, pady=10)
 
-    if user_type == 0:
+    if user_type == 0:  # If a student
         student_page()
-    else:
+    else:  # If a teacher
         teacher_dropdowns()
 
 # run inital login screen on boot
