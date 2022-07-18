@@ -10,7 +10,7 @@ from os.path import exists
 import create_sample_database
 
 # for setting default date as today
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 
 root = tk.Tk()
 
@@ -25,7 +25,7 @@ def main_screen():
     root.title("UVU Piano Practice")
     login_text = tk.StringVar()
     login_text.set("Login Now")
-    login_btn = tk.Button(root, textvariable=login_text, command=lambda: main_close(),
+    login_btn = tk.Button(root, textvariable=login_text, command=lambda: main_close_login(),
                           font="Raleway", bg="#275D38", fg="white", height=2, width=15)
     login_btn.grid(column=0, row=2)
 
@@ -44,7 +44,7 @@ def main_screen():
     logo_label.image = logo
     logo_label.grid(column=0, row=0)
 
-    def main_close():
+    def main_close_login():
         login_btn.destroy()
         register_btn.destroy()
         logo_label.destroy()
@@ -347,9 +347,13 @@ def practice_screen(user_type):
                 user_menu_window.grab_release()
                 top_frame.destroy()
                 record_frame.destroy()
-                user_frame.destroy()
                 user_menu_window.destroy()
                 minutes_frame.destroy()
+                if user_type == 0:
+                    student_input_frame.destroy()
+                    button_frame.destroy()
+                if user_type == 1:
+                    teacher_select_frame.destroy()
                 main_screen()
 
     # frame to hold the Treeview object
@@ -383,11 +387,22 @@ def practice_screen(user_type):
     minutes_frame.grid(column=0, row=5)
 
     # TODO change from this point on for teacher user_type=1
+    
+    # frame for student user to input new songs, dates, and times
+    if user_type == 0:
+        student_input_frame = tk.Frame(root)
+        student_input_frame.grid(column=0, row=2)
+        button_frame = tk.Frame(root)
+        button_frame.grid(column=0, row=3)
 
+    # frame for teacheruser to select students
+    if user_type == 1:
+        teacher_select_frame = tk.Frame(root)
+        teacher_select_frame.grid(column=0, row=2)
+        
+        
     def teacher_dropdowns():
-        teacher_frame = tk.Frame(root)
-        teacher_frame.grid(column=0, row=2)
-
+        
         filename = "user_data"
         # Check if sample database has been created:
         if not exists(filename):
@@ -419,9 +434,9 @@ def practice_screen(user_type):
                 student_dropdown.insert('end', item)
             # update(students)
 
-        entry = tk.Entry(teacher_frame, bg='gray', fg='white')
+        entry = tk.Entry(teacher_select_frame, bg='gray', fg='white')
         entry.bind('<KeyRelease>', scan_list)
-        student_dropdown = tk.Listbox(teacher_frame, bg='gray', fg='white', selectbackground="#275D38",
+        student_dropdown = tk.Listbox(teacher_select_frame, bg='gray', fg='white', selectbackground="#275D38",
                                       selectmode='single')
         update(students_list)
 
@@ -430,7 +445,7 @@ def practice_screen(user_type):
             entry.grid(column=0, row=1)
             student_dropdown.grid(column=0, row=2)
 
-        select_student = tk.Button(teacher_frame, text="Select a student", bg="#275D38", fg='white', command=student_button)
+        select_student = tk.Button(teacher_select_frame, text="Select a student", bg="#275D38", fg='white', command=student_button)
         select_student.grid(column=0, row=0)
 
         def student_selected(event):
@@ -448,24 +463,55 @@ def practice_screen(user_type):
 
         def week_dropdown_f(student):
 
+            #access student 'data'
+            #get list of song entries student[3]
+            songs_list = data[student][3]
+            #take each entry student[3][i]
+            week_dict = {}
+            for i in range(len(songs_list)):
+                #create date range
+                day = songs_list[i][0]
+                print(day)
+                dt = datetime.strptime(day, "%a, %B %d")
+                start = dt - timedelta(days=dt.weekday())
+                end = start + timedelta(days=6)
+                week = f'{start.strftime("%a, %B %d")} - {end.strftime("%a, %B %d")}'
+                print(week)
+                #store a list of indices into value with week as key
+                if week in week_dict.keys():
+                    week_dict[week].append(i)
+                else:
+                    week_dict[week] = [i]
+            
+            print(week_dict)
+         
             def week_selected():
                 selected_week = week_dropdown.get(tk.ANCHOR)
                 print("week was selected: ", selected_week)
+                # clear table
+                for item in song_set.get_children():
+                    song_set.delete(item)
+
+                # load week with dates and any entries
+                for val in range(len(week_dict[selected_week])):
+                    entry = songs_list[val]
+                    song_set.insert(parent='', index='end', iid=day, text='',
+                                        values=(entry[0], entry[1], f"{entry[2]} minutes"))
 
             # Pull up the week menu
             print("Student ", student, "was selected-")
-            select_week = tk.Button(teacher_frame, text="Select a week", bg="#275D38", fg='white', command=week_selected)
+            select_week = tk.Button(teacher_select_frame, text="Select a week", bg="#275D38", fg='white', command=week_selected)
             select_week.grid(column=1, row=0)
 
             # TODO: remove test_week and use actual practice weeks of the selected student.
             test_week = ["06/19/22-07/25/22", "06/26/22-07/02/22", "07/03/22-07/09/22", "07/10/22-07/16/22"]
 
-            week_dropdown = tk.Listbox(teacher_frame, bg='gray', fg='white', selectbackground="#275D38",
+            week_dropdown = tk.Listbox(teacher_select_frame, bg='gray', fg='white', selectbackground="#275D38",
                                       selectmode='single')
-            for items in test_week:
+            for items in week_dict.keys():
                 week_dropdown.insert('end', items)
             week_dropdown.grid(column=1, row=2)
-
+    
 
     def student_page():
         # Create the current week to populate the date data field
@@ -533,23 +579,20 @@ def practice_screen(user_type):
         data = load_entries(this_week)
         print(f"Initial data load for {username}:\n{data[username]}")
 
-        # frame for user to input new songs, dates, and times
-        input_frame = tk.Frame(root)
-        input_frame.grid(column=0, row=2)
 
         # input labels
-        id = tk.Label(input_frame, text="Date", fg="green")
+        id = tk.Label(student_input_frame, text="Date", fg="green")
         id.grid(row=0, column=0)
 
-        full_Name = tk.Label(input_frame, text="Song Name", fg="green")
+        full_Name = tk.Label(student_input_frame, text="Song Name", fg="green")
         full_Name.grid(row=0, column=1)
 
-        award = tk.Label(input_frame, text="Time in minutes", fg="green")
+        award = tk.Label(student_input_frame, text="Time in minutes", fg="green")
         award.grid(row=0, column=2)
 
         # SONG DATE
         # song data input entry fields
-        id_entry = tk.Entry(input_frame)
+        id_entry = tk.Entry(student_input_frame)
         id_entry.grid(row=1, column=0)
 
         # set current date to date entry field
@@ -558,7 +601,7 @@ def practice_screen(user_type):
         # setup today as read only
         id_entry.insert(0, day_string)
         id_entry.config(state='readonly')
-
+        
         # Beginning selection is set to current date, if exists
         selected = song_set.get_children()[today.weekday()]
         song_set.focus(selected)
@@ -568,12 +611,12 @@ def practice_screen(user_type):
         values = song_set.item(today.weekday(), 'values')
 
         # SONG NAME
-        fullname_entry = tk.Entry(input_frame)
+        fullname_entry = tk.Entry(student_input_frame)
         fullname_entry.grid(row=1, column=1)
         fullname_entry.insert(0, values[1])
 
         # SONG TIME PRACTICED
-        award_entry = tk.Entry(input_frame)
+        award_entry = tk.Entry(student_input_frame)
         award_entry.grid(row=1, column=2)
         award_entry.insert(0, values[2][:-8])
 
@@ -623,8 +666,6 @@ def practice_screen(user_type):
         # To choose a session, click the practice session and press the button "Select Practice Session"
         # To update a past entry, modify the entry as you desire, then press "Refresh practice calendar"
         # For creating a new record, type information in box and then press "Update today's practice"
-        button_frame = tk.Frame(root)
-        button_frame.grid(column=0, row=3)
 
         input_button = tk.Button(button_frame, text="Edit today's practice session", command=input_record)
         input_button.grid(column=0, row=0, pady=10)
