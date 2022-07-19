@@ -520,7 +520,8 @@ def practice_screen(user_type):
         today_day = today.weekday()
         for i in range(7):
             dte = (today - timedelta(days=today_day))
-            this_week.append(dte.strftime("%a, %B %d"))
+            #this_week.append(dte.strftime("%a, %B %d"))
+            this_week.append(dte)
             today_day -= 1
 
         #     print(this_week)
@@ -553,14 +554,14 @@ def practice_screen(user_type):
                     entry = practice_table[ent]
                     if this_week[day] == entry[0]:
                         song_set.insert(parent='', index='end', iid=day, text='',
-                                        values=(entry[0], entry[1], f"{entry[2]} minutes"))
+                                        values=(f"{entry[0]:%a, %B %d}", entry[1], f"{entry[2]} minutes"))
                         total += entry[2]
                         remain -= entry[2]
                         break
                     if this_week[day] != entry[0]:
                         if ent == len(practice_table) - 1:
                             song_set.insert(parent='', index='end', iid=day,
-                                            text='', values=(this_week[day], "", ""))
+                                            text='', values=(f"{this_week[day]:%a, %B %d}", "", ""))
                         else:
                             continue
             # helper function to display reward info at bottom of screen
@@ -597,7 +598,8 @@ def practice_screen(user_type):
 
         # set current date to date entry field
         today = date.today()
-        day_string = today.strftime("%a, %B %d")
+        #day_string = today.strftime("%a, %B %d")
+        day_string = f"{today:%a, %B %d}"
         # setup today as read only
         id_entry.insert(0, day_string)
         id_entry.config(state='readonly')
