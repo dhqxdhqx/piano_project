@@ -1,5 +1,5 @@
 import pickle
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 
 
 def create_database():
@@ -15,14 +15,14 @@ def create_database():
         this_week.append(today - timedelta(days=today_day))
         today_day -= 1
 
-    d = { "Test" : [encrypt_password("Test123"), 0, 75, [['Wed, June 15', 'Mary had a little lamb', 20],
-                         [this_week[0].strftime("%a, %B %d"), 'Twinkle, Twinkle', 15],
-                         [this_week[1].strftime("%a, %B %d"), 'Mary had a little lamb', 15],
-                         ['Fri, June 24', 'Twinkle, Twinkle', 15]]],
-          "x" : [encrypt_password("x"), 0, 120, [[this_week[0].strftime("%a, %B %d"), 'mud', 17],
-                       [this_week[1].strftime("%a, %B %d"), 'jerry', 10],
-                       [this_week[2].strftime("%a, %B %d"), 'grapevine', 20],
-                       ['Fri, June 24', 'grapevine', 15]  ] ],
+    d = { "Test" : [encrypt_password("Test123"), 0, 75, [[date(2022, 6, 15), 'Mary had a little lamb', 20],
+                         [this_week[0], 'Twinkle, Twinkle', 15],
+                         [this_week[1], 'Mary had a little lamb', 15],
+                         [date(2022, 7, 22), 'Twinkle, Twinkle', 15]]],
+          "x" : [encrypt_password("x"), 0, 120, [[this_week[0], 'mud', 17],
+                       [this_week[1], 'jerry', 10],
+                       [this_week[2], 'grapevine', 20],
+                       [date(2022, 7, 22), 'grapevine', 15]  ] ],
           "Teacher": [encrypt_password("Teacher"), 1, ["Test", "x"]]
           }
 
