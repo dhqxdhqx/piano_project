@@ -413,7 +413,7 @@ def practice_screen(user_type):
         students_list = data[username][2]
 
 
-        def scan_list(event):
+        def scan_students(event):
             val = event.widget.get()
             print(val)
 
@@ -434,26 +434,26 @@ def practice_screen(user_type):
                 student_dropdown.insert('end', item)
             # update(students)
 
-        entry = tk.Entry(teacher_select_frame, bg='gray', fg='white')
-        entry.bind('<KeyRelease>', scan_list)
+        student_entry = tk.Entry(teacher_select_frame, bg='gray', fg='white')
+        student_entry.bind('<KeyRelease>', scan_students)
         student_dropdown = tk.Listbox(teacher_select_frame, bg='gray', fg='white', selectbackground="#275D38",
                                       selectmode='single')
         update(students_list)
 
         def student_button():
             '''button that is clicked for select student'''
-            entry.grid(column=0, row=1)
+            student_entry.grid(column=0, row=1)
             student_dropdown.grid(column=0, row=2)
 
-        select_student = tk.Button(teacher_select_frame, text="Select a student", bg="#275D38", fg='white', command=student_button)
-        select_student.grid(column=0, row=0)
+        select_student_btn = tk.Button(teacher_select_frame, text="Select a student", bg="#275D38", fg='white', command=student_button)
+        select_student_btn.grid(column=0, row=0)
 
         def student_selected(event):
             '''handles student selected from student_dropdown Listbox item'''
             selected = student_dropdown.get(tk.ANCHOR)
             print(selected)
-            entry.delete(0, tk.END)
-            entry.insert(0, selected)
+            student_entry.delete(0, tk.END)
+            student_entry.insert(0, selected)
 
             student_dropdown.grid_remove()
             week_dropdown_f(selected)
@@ -472,8 +472,7 @@ def practice_screen(user_type):
                 #create date range
                 day = songs_list[i][0]
                 print(day)
-                dt = datetime.strptime(day, "%a, %B %d")
-                start = dt - timedelta(days=dt.weekday())
+                start = day - timedelta(days=day.weekday())
                 end = start + timedelta(days=6)
                 week = f'{start.strftime("%a, %B %d")} - {end.strftime("%a, %B %d")}'
                 print(week)
@@ -493,9 +492,9 @@ def practice_screen(user_type):
                     song_set.delete(item)
 
                 # load week with dates and any entries
-                for val in range(len(week_dict[selected_week])):
+                for val in week_dict[selected_week]:
                     entry = songs_list[val]
-                    song_set.insert(parent='', index='end', iid=day, text='',
+                    song_set.insert(parent='', index='end', iid=val, text='',
                                         values=(entry[0], entry[1], f"{entry[2]} minutes"))
 
             # Pull up the week menu
