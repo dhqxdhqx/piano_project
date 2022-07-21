@@ -269,7 +269,7 @@ def registration_screen():
 
             if account_type == 0:  #If student
                 database_file.close()
-                data[username] = [password, account_type, 0, [[date.today().strftime("%a, %B %d"), "", 0]]]
+                data[username] = [password, account_type, 0, [[date.today(), "", 0]]]
                 # TODO: if we make it so student can select their teacher, change so that the student is only added to that teacher's list
                 # Putting student's username in the list of students for each teacher
                 for key, value in data.items():
@@ -399,14 +399,96 @@ def practice_screen(user_type):
     if user_type == 1:
         teacher_select_frame = tk.Frame(root)
         teacher_select_frame.grid(column=0, row=2)
-        
-        
+       
+    def load_entries(un, wk):
+        '''Fills week display with dates and practice entries
+           First clears table of all information, then fills each line
+           with the date and song entry for that day, calls helper
+           function to display reward info at bottom of screen.
+           Retuns dictionary of user data.'''
+
+        filename = "user_data"
+        output_file = open(filename, 'rb')
+        data = pickle.load(output_file)
+        total, remain, practice_table = 0, data[un][2], data[un][3]
+
+        # clear table
+        for item in song_set.get_children():
+            song_set.delete(item)
+
+        # load week with dates and any entries
+        for day in range(len(wk)):
+            for ent in range(len(practice_table)):
+                entry = practice_table[ent]
+                if wk[day] == entry[0]:
+                    song_set.insert(parent='', index='end', iid=day, text='',
+                                    values=(f"{entry[0]:%a, %B %d}", entry[1], f"{entry[2]} minutes"))
+                    total += entry[2]
+                    remain -= entry[2]
+                    break
+                if wk[day] != entry[0]:
+                    if ent == len(practice_table) - 1:
+                        song_set.insert(parent='', index='end', iid=day,
+                                        text='', values=(f"{wk[day]:%a, %B %d}", "", ""))
+                    else:
+                        continue
+        # helper function to display reward info at bottom of screen
+        minutes_help(total, remain)
+        return data
+
+    def minutes_help(total, remain):
+        '''Receives weekly total minutes and remaining minutes,
+           then displays them at bottom of screen.'''
+        tk.Label(minutes_frame, text=f"Total Minutes: {total}", font="Raleway",
+                 bg="white", fg="black", height=2, width=20).grid(column=0, row=0, sticky='w')
+        tk.Label(minutes_frame, text=f"Minutes to Reward: {remain}", font="Raleway",
+                 bg="white", fg="black", height=2, width=20).grid(column=2, row=0, sticky='e')
+    
+    def input_record(un, wk, day, song, mins, dte, data):
+        '''insert new values into the data frame'''
+
+        # Check if a song name was entered
+        song_name = song.get()
+
+        # Check if the minutes are valid:
+        minutes = ""
+        for char in mins.get():
+            if char.isdigit():
+                minutes += char
+
+        # If invalid minutes, else valid
+        if minutes == "":
+            messagebox.showinfo("Error: invalid format: ", "Please enter a time in minutes. (ie. 15)")
+            mins.delete(0, tk.END)
+        elif song_name == "":
+            messagebox.showinfo("Error: no song name entered.", "Please enter a valid song name.")
+        else:
+            #  update user data dictionary
+            practice_table = data[un][3]
+            for ent in range(len(practice_table)):
+                entry = practice_table[ent]
+                if wk[day.weekday()] == entry[0]:
+                    entry[1], entry[2] = song.get(), int(minutes)
+                    break
+                else:
+                    for Tag in wk:
+                        if f"{Tag:%a, %B %d}" == dte.get():
+                            dia = Tag
+                    if ent == len(practice_table) - 1:
+                        data[un][3].append([dia, song.get(),int(minutes)])
+                    else:
+                        continue
+            # save user data to database and refresh display
+            filename = "user_data"
+            output_file = open(filename, 'wb')
+            pickle.dump(data, output_file)
+            output_file.close()
+            load_entries(un, wk)
+            print(f"\nUpdated data load for {un}:\n{data[un]}")
+ 
     def teacher_dropdowns():
         
         filename = "user_data"
-        # Check if sample database has been created:
-        if not exists(filename):
-            create_sample_database.create_database()
         output_file = open(filename, 'rb')
         data = pickle.load(output_file)
 
@@ -478,9 +560,12 @@ def practice_screen(user_type):
                 print(week)
                 #store a list of indices into value with week as key
                 if week in week_dict.keys():
-                    week_dict[week].append(i)
+                    continue
                 else:
-                    week_dict[week] = [i]
+                    week_dict[week] = []
+                    for i in range(7):
+                        dte = (start  + timedelta(days=i))
+                        week_dict[week].append(dte)
             
             print(week_dict)
          
@@ -492,10 +577,7 @@ def practice_screen(user_type):
                     song_set.delete(item)
 
                 # load week with dates and any entries
-                for val in week_dict[selected_week]:
-                    entry = songs_list[val]
-                    song_set.insert(parent='', index='end', iid=val, text='',
-                                        values=(entry[0], entry[1], f"{entry[2]} minutes"))
+                load_entries(student, week_dict[selected_week])
 
             # Pull up the week menu
             print("Student ", student, "was selected-")
@@ -519,64 +601,13 @@ def practice_screen(user_type):
         today_day = today.weekday()
         for i in range(7):
             dte = (today - timedelta(days=today_day))
-            #this_week.append(dte.strftime("%a, %B %d"))
             this_week.append(dte)
             today_day -= 1
 
         #     print(this_week)
 
-        # data
-        def load_entries(this_week):
-            '''Fills week display with dates and practice entries
-               First clears table of all information, then fills each line
-               with the date and song entry for that day, calls helper
-               function to display reward info at bottom of screen.
-               Retuns dictionary of user data.'''
-
-            filename = "user_data"
-
-            # Check if sample database has been created:
-            if not exists(filename):
-                create_sample_database.create_database()
-
-            output_file = open(filename, 'rb')
-            data = pickle.load(output_file)
-            total, remain, practice_table = 0, data[username][2], data[username][3]
-
-            # clear table
-            for item in song_set.get_children():
-                song_set.delete(item)
-
-            # load week with dates and any entries
-            for day in range(len(this_week)):
-                for ent in range(len(practice_table)):
-                    entry = practice_table[ent]
-                    if this_week[day] == entry[0]:
-                        song_set.insert(parent='', index='end', iid=day, text='',
-                                        values=(f"{entry[0]:%a, %B %d}", entry[1], f"{entry[2]} minutes"))
-                        total += entry[2]
-                        remain -= entry[2]
-                        break
-                    if this_week[day] != entry[0]:
-                        if ent == len(practice_table) - 1:
-                            song_set.insert(parent='', index='end', iid=day,
-                                            text='', values=(f"{this_week[day]:%a, %B %d}", "", ""))
-                        else:
-                            continue
-            # helper function to display reward info at bottom of screen
-            minutes_help(total, remain)
-            return data
-
-        def minutes_help(total, remain):
-            '''Receives weekly total minutes and remaining minutes,
-               then displays them at bottom of screen.'''
-            tk.Label(minutes_frame, text=f"Total Minutes: {total}", font="Raleway",
-                     bg="white", fg="black", height=2, width=20).grid(column=0, row=0, sticky='w')
-            tk.Label(minutes_frame, text=f"Minutes to Reward: {remain}", font="Raleway",
-                     bg="white", fg="black", height=2, width=20).grid(column=2, row=0, sticky='e')
-
         # creates dictionary from dat file
-        data = load_entries(this_week)
+        data = load_entries(username, this_week)
         print(f"Initial data load for {username}:\n{data[username]}")
 
 
@@ -621,54 +652,13 @@ def practice_screen(user_type):
         award_entry.grid(row=1, column=2)
         award_entry.insert(0, values[2][:-8])
 
-        # functionality to input a new song record
-        def input_record():
-            '''insert new values into the data frame'''
-
-            # Check if a song name was entered
-            song_name = fullname_entry.get()
-
-            # Check if the minutes are valid:
-            minutes = ""
-            for char in award_entry.get():
-                if char.isdigit():
-                    minutes += char
-
-            # If invalid minutes, else valid
-            if minutes == "":
-                messagebox.showinfo("Error: invalid format: ", "Please enter a time in minutes. (ie. 15)")
-                award_entry.delete(0, tk.END)
-            elif song_name == "":
-                messagebox.showinfo("Error: no song name entered.", "Please enter a valid song name.")
-            else:
-                #  update user data dictionary
-                #  please use minutes variable instead of award_entry.get(), minutes has gone through a digit check
-                practice_table = data[username][3]
-                for ent in range(len(practice_table)):
-                    entry = practice_table[ent]
-                    if this_week[today.weekday()] == entry[0]:
-                        entry[1], entry[2] = fullname_entry.get(), int(minutes)
-                        break
-                    else:
-                        if ent == len(practice_table) - 1:
-                            data[username][3].append([id_entry.get(), fullname_entry.get(),
-                                                      int(minutes)])
-                        else:
-                            continue
-                # save user data to database and refresh display
-                filename = "user_data"
-                output_file = open(filename, 'wb')
-                pickle.dump(data, output_file)
-                output_file.close()
-                load_entries(this_week)
-                print(f"\nUpdated data load for {username}:\n{data[username]}")
-
         # buttons
         # To choose a session, click the practice session and press the button "Select Practice Session"
         # To update a past entry, modify the entry as you desire, then press "Refresh practice calendar"
         # For creating a new record, type information in box and then press "Update today's practice"
 
-        input_button = tk.Button(button_frame, text="Edit today's practice session", command=input_record)
+        input_button = tk.Button(button_frame,text="Edit today's practice session",
+                    command=lambda:input_record(username,this_week,today,fullname_entry,award_entry,id_entry,data))
         input_button.grid(column=0, row=0, pady=10)
 
     if user_type == 0:  # If a student
