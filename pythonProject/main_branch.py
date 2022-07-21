@@ -471,9 +471,11 @@ def practice_screen(user_type):
                     entry[1], entry[2] = song.get(), int(minutes)
                     break
                 else:
+                    for Tag in wk:
+                        if f"{Tag:%a, %B %d}" == dte.get():
+                            dia = Tag
                     if ent == len(practice_table) - 1:
-                        data[un][3].append([dte.get(), song.get(),
-                                                  int(minutes)])
+                        data[un][3].append([dia, song.get(),int(minutes)])
                     else:
                         continue
             # save user data to database and refresh display
