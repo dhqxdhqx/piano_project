@@ -10,7 +10,7 @@ from os.path import exists
 import create_sample_database
 
 # for setting default date as today
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 
 root = tk.Tk()
 
@@ -25,7 +25,7 @@ def main_screen():
     root.title("UVU Piano Practice")
     login_text = tk.StringVar()
     login_text.set("Login Now")
-    login_btn = tk.Button(root, textvariable=login_text, command=lambda: main_close(),
+    login_btn = tk.Button(root, textvariable=login_text, command=lambda: main_close_login(),
                           font="Raleway", bg="#275D38", fg="white", height=2, width=15)
     login_btn.grid(column=0, row=2)
 
@@ -44,7 +44,7 @@ def main_screen():
     logo_label.image = logo
     logo_label.grid(column=0, row=0)
 
-    def main_close():
+    def main_close_login():
         login_btn.destroy()
         register_btn.destroy()
         logo_label.destroy()
@@ -268,7 +268,7 @@ def registration_screen():
 
             if account_type == 0:  #If student
                 database_file.close()
-                data[username] = [password, account_type, 0, [[date.today().strftime("%a, %B %d"), "", 0]]]
+                data[username] = [password, account_type, 0, [[date.today(), "", 0]]]
                 # TODO: if we make it so student can select their teacher, change so that the student is only added to that teacher's list
                 # Putting student's username in the list of students for each teacher
                 for key, value in data.items():
@@ -346,9 +346,13 @@ def practice_screen(user_type):
                 user_menu_window.grab_release()
                 top_frame.destroy()
                 record_frame.destroy()
-                user_frame.destroy()
                 user_menu_window.destroy()
                 minutes_frame.destroy()
+                if user_type == 0:
+                    student_input_frame.destroy()
+                    button_frame.destroy()
+                if user_type == 1:
+                    teacher_select_frame.destroy()
                 main_screen()
 
     # frame to hold the Treeview object
@@ -382,22 +386,115 @@ def practice_screen(user_type):
     minutes_frame.grid(column=0, row=5)
 
     # TODO change from this point on for teacher user_type=1
+    
+    # frame for student user to input new songs, dates, and times
+    if user_type == 0:
+        student_input_frame = tk.Frame(root)
+        student_input_frame.grid(column=0, row=2)
+        button_frame = tk.Frame(root)
+        button_frame.grid(column=0, row=3)
 
-    def teacher_dropdowns():
-        teacher_frame = tk.Frame(root)
-        teacher_frame.grid(column=0, row=2)
+    # frame for teacheruser to select students
+    if user_type == 1:
+        teacher_select_frame = tk.Frame(root)
+        teacher_select_frame.grid(column=0, row=2)
+       
+    def load_entries(un, wk):
+        '''Fills week display with dates and practice entries
+           First clears table of all information, then fills each line
+           with the date and song entry for that day, calls helper
+           function to display reward info at bottom of screen.
+           Retuns dictionary of user data.'''
 
         filename = "user_data"
-        # Check if sample database has been created:
-        if not exists(filename):
-            create_sample_database.create_database()
+        output_file = open(filename, 'rb')
+        data = pickle.load(output_file)
+        total, remain, practice_table = 0, data[un][2], data[un][3]
+
+        # clear table
+        for item in song_set.get_children():
+            song_set.delete(item)
+
+        # load week with dates and any entries
+        for day in range(len(wk)):
+            for ent in range(len(practice_table)):
+                entry = practice_table[ent]
+                if wk[day] == entry[0]:
+                    song_set.insert(parent='', index='end', iid=day, text='',
+                                    values=(f"{entry[0]:%a, %B %d}", entry[1], f"{entry[2]} minutes"))
+                    total += entry[2]
+                    remain -= entry[2]
+                    break
+                if wk[day] != entry[0]:
+                    if ent == len(practice_table) - 1:
+                        song_set.insert(parent='', index='end', iid=day,
+                                        text='', values=(f"{wk[day]:%a, %B %d}", "", ""))
+                    else:
+                        continue
+        # helper function to display reward info at bottom of screen
+        minutes_help(total, remain)
+        return data
+
+    def minutes_help(total, remain):
+        '''Receives weekly total minutes and remaining minutes,
+           then displays them at bottom of screen.'''
+        tk.Label(minutes_frame, text=f"Total Minutes: {total}", font="Raleway",
+                 bg="white", fg="black", height=2, width=20).grid(column=0, row=0, sticky='w')
+        tk.Label(minutes_frame, text=f"Minutes to Reward: {remain}", font="Raleway",
+                 bg="white", fg="black", height=2, width=20).grid(column=2, row=0, sticky='e')
+    
+    def input_record(un, wk, day, song, mins, dte, data):
+        '''insert new values into the data frame'''
+
+        # Check if a song name was entered
+        song_name = song.get()
+
+        # Check if the minutes are valid:
+        minutes = ""
+        for char in mins.get():
+            if char.isdigit():
+                minutes += char
+
+        # If invalid minutes, else valid
+        if minutes == "":
+            messagebox.showinfo("Error: invalid format: ", "Please enter a time in minutes. (ie. 15)")
+            mins.delete(0, tk.END)
+        elif song_name == "":
+            messagebox.showinfo("Error: no song name entered.", "Please enter a valid song name.")
+        else:
+            #  update user data dictionary
+            practice_table = data[un][3]
+            for ent in range(len(practice_table)):
+                entry = practice_table[ent]
+                if wk[day.weekday()] == entry[0]:
+                    entry[1], entry[2] = song.get(), int(minutes)
+                    break
+                else:
+                    for Tag in wk:
+                        if f"{Tag:%a, %B %d}" == dte.get():
+                            dia = Tag
+                    if ent == len(practice_table) - 1:
+                        data[un][3].append([dia, song.get(),int(minutes)])
+                    else:
+                        continue
+            # save user data to database and refresh display
+            filename = "user_data"
+            output_file = open(filename, 'wb')
+            pickle.dump(data, output_file)
+            output_file.close()
+            load_entries(un, wk)
+            print(f"\nUpdated data load for {un}:\n{data[un]}")
+ 
+    def teacher_dropdowns():
+        
+        filename = "user_data"
         output_file = open(filename, 'rb')
         data = pickle.load(output_file)
 
         students_list = data[username][2]
 
 
-        def scan_list(event):
+        def scan_students(event):
             val = event.widget.get()
             print(val)
 
@@ -418,26 +515,26 @@ def practice_screen(user_type):
                 student_dropdown.insert('end', item)
             # update(students)
 
-        entry = tk.Entry(teacher_frame, bg='gray', fg='white')
-        entry.bind('<KeyRelease>', scan_list)
-        student_dropdown = tk.Listbox(teacher_frame, bg='gray', fg='white', selectbackground="#275D38",
+        student_entry = tk.Entry(teacher_select_frame, bg='gray', fg='white')
+        student_entry.bind('<KeyRelease>', scan_students)
+        student_dropdown = tk.Listbox(teacher_select_frame, bg='gray', fg='white', selectbackground="#275D38",
                                       selectmode='single')
         update(students_list)
 
         def student_button():
             '''button that is clicked for select student'''
-            entry.grid(column=0, row=1)
+            student_entry.grid(column=0, row=1)
             student_dropdown.grid(column=0, row=2)
 
-        select_student = tk.Button(teacher_frame, text="Select a student", bg="#275D38", fg='white', command=student_button)
-        select_student.grid(column=0, row=0)
+        select_student_btn = tk.Button(teacher_select_frame, text="Select a student", bg="#275D38", fg='white', command=student_button)
+        select_student_btn.grid(column=0, row=0)
 
         def student_selected(event):
             '''handles student selected from student_dropdown Listbox item'''
             selected = student_dropdown.get(tk.ANCHOR)
             print(selected)
-            entry.delete(0, tk.END)
-            entry.insert(0, selected)
+            student_entry.delete(0, tk.END)
+            student_entry.insert(0, selected)
 
             student_dropdown.grid_remove()
             week_dropdown_f(selected)
@@ -447,24 +544,54 @@ def practice_screen(user_type):
 
         def week_dropdown_f(student):
 
+            #access student 'data'
+            #get list of song entries student[3]
+            songs_list = data[student][3]
+            #take each entry student[3][i]
+            week_dict = {}
+            for i in range(len(songs_list)):
+                #create date range
+                day = songs_list[i][0]
+                print(day)
+                start = day - timedelta(days=day.weekday())
+                end = start + timedelta(days=6)
+                week = f'{start.strftime("%a, %B %d")} - {end.strftime("%a, %B %d")}'
+                print(week)
+                #store a list of indices into value with week as key
+                if week in week_dict.keys():
+                    continue
+                else:
+                    week_dict[week] = []
+                    for i in range(7):
+                        dte = (start  + timedelta(days=i))
+                        week_dict[week].append(dte)
+            
+            print(week_dict)
+         
             def week_selected():
                 selected_week = week_dropdown.get(tk.ANCHOR)
                 print("week was selected: ", selected_week)
+                # clear table
+                for item in song_set.get_children():
+                    song_set.delete(item)
+
+                # load week with dates and any entries
+                load_entries(student, week_dict[selected_week])
 
             # Pull up the week menu
             print("Student ", student, "was selected-")
-            select_week = tk.Button(teacher_frame, text="Select a week", bg="#275D38", fg='white', command=week_selected)
+            select_week = tk.Button(teacher_select_frame, text="Select a week", bg="#275D38", fg='white', command=week_selected)
             select_week.grid(column=1, row=0)
 
             # TODO: remove test_week and use actual practice weeks of the selected student.
             test_week = ["06/19/22-07/25/22", "06/26/22-07/02/22", "07/03/22-07/09/22", "07/10/22-07/16/22"]
 
-            week_dropdown = tk.Listbox(teacher_frame, bg='gray', fg='white', selectbackground="#275D38",
+            week_dropdown = tk.Listbox(teacher_select_frame, bg='gray', fg='white', selectbackground="#275D38",
                                       selectmode='single')
-            for items in test_week:
+            for items in week_dict.keys():
                 week_dropdown.insert('end', items)
             week_dropdown.grid(column=1, row=2)
-
+    
 
     def student_page():
         # Create the current week to populate the date data field
@@ -473,91 +600,39 @@ def practice_screen(user_type):
         today_day = today.weekday()
         for i in range(7):
             dte = (today - timedelta(days=today_day))
-            this_week.append(dte.strftime("%a, %B %d"))
+            this_week.append(dte)
             today_day -= 1
 
         #     print(this_week)
 
-        # data
-        def load_entries(this_week):
-            '''Fills week display with dates and practice entries
-               First clears table of all information, then fills each line
-               with the date and song entry for that day, calls helper
-               function to display reward info at bottom of screen.
-               Retuns dictionary of user data.'''
-
-            filename = "user_data"
-
-            # Check if sample database has been created:
-            if not exists(filename):
-                create_sample_database.create_database()
-
-            output_file = open(filename, 'rb')
-            data = pickle.load(output_file)
-            total, remain, practice_table = 0, data[username][2], data[username][3]
-
-            # clear table
-            for item in song_set.get_children():
-                song_set.delete(item)
-
-            # load week with dates and any entries
-            for day in range(len(this_week)):
-                for ent in range(len(practice_table)):
-                    entry = practice_table[ent]
-                    if this_week[day] == entry[0]:
-                        song_set.insert(parent='', index='end', iid=day, text='',
-                                        values=(entry[0], entry[1], f"{entry[2]} minutes"))
-                        total += entry[2]
-                        remain -= entry[2]
-                        break
-                    if this_week[day] != entry[0]:
-                        if ent == len(practice_table) - 1:
-                            song_set.insert(parent='', index='end', iid=day,
-                                            text='', values=(this_week[day], "", ""))
-                        else:
-                            continue
-            # helper function to display reward info at bottom of screen
-            minutes_help(total, remain)
-            return data
-
-        def minutes_help(total, remain):
-            '''Receives weekly total minutes and remaining minutes,
-               then displays them at bottom of screen.'''
-            tk.Label(minutes_frame, text=f"Total Minutes: {total}", font="Raleway",
-                     bg="white", fg="black", height=2, width=20).grid(column=0, row=0, sticky='w')
-            tk.Label(minutes_frame, text=f"Minutes to Reward: {remain}", font="Raleway",
-                     bg="white", fg="black", height=2, width=20).grid(column=2, row=0, sticky='e')
-
         # creates dictionary from dat file
-        data = load_entries(this_week)
+        data = load_entries(username, this_week)
         print(f"Initial data load for {username}:\n{data[username]}")
 
-        # frame for user to input new songs, dates, and times
-        input_frame = tk.Frame(root)
-        input_frame.grid(column=0, row=2)
 
         # input labels
-        id = tk.Label(input_frame, text="Date", fg="green")
+        id = tk.Label(student_input_frame, text="Date", fg="green")
         id.grid(row=0, column=0)
 
-        full_Name = tk.Label(input_frame, text="Song Name", fg="green")
+        full_Name = tk.Label(student_input_frame, text="Song Name", fg="green")
         full_Name.grid(row=0, column=1)
 
-        award = tk.Label(input_frame, text="Time in minutes", fg="green")
+        award = tk.Label(student_input_frame, text="Time in minutes", fg="green")
         award.grid(row=0, column=2)
 
         # SONG DATE
         # song data input entry fields
-        id_entry = tk.Entry(input_frame)
+        id_entry = tk.Entry(student_input_frame)
         id_entry.grid(row=1, column=0)
 
         # set current date to date entry field
         today = date.today()
-        day_string = today.strftime("%a, %B %d")
+        #day_string = today.strftime("%a, %B %d")
+        day_string = f"{today:%a, %B %d}"
         # setup today as read only
         id_entry.insert(0, day_string)
         id_entry.config(state='readonly')
-
+        
         # Beginning selection is set to current date, if exists
         selected = song_set.get_children()[today.weekday()]
         song_set.focus(selected)
@@ -567,65 +642,22 @@ def practice_screen(user_type):
         values = song_set.item(today.weekday(), 'values')
 
         # SONG NAME
-        fullname_entry = tk.Entry(input_frame)
+        fullname_entry = tk.Entry(student_input_frame)
         fullname_entry.grid(row=1, column=1)
         fullname_entry.insert(0, values[1])
 
         # SONG TIME PRACTICED
-        award_entry = tk.Entry(input_frame)
+        award_entry = tk.Entry(student_input_frame)
         award_entry.grid(row=1, column=2)
         award_entry.insert(0, values[2][:-8])
-
-        # functionality to input a new song record
-        def input_record():
-            '''insert new values into the data frame'''
-
-            # Check if a song name was entered
-            song_name = fullname_entry.get()
-
-            # Check if the minutes are valid:
-            minutes = ""
-            for char in award_entry.get():
-                if char.isdigit():
-                    minutes += char
-
-            # If invalid minutes, else valid
-            if minutes == "":
-                messagebox.showinfo("Error: invalid format: ", "Please enter a time in minutes. (ie. 15)")
-                award_entry.delete(0, tk.END)
-            elif song_name == "":
-                messagebox.showinfo("Error: no song name entered.", "Please enter a valid song name.")
-            else:
-                #  update user data dictionary
-                #  please use minutes variable instead of award_entry.get(), minutes has gone through a digit check
-                practice_table = data[username][3]
-                for ent in range(len(practice_table)):
-                    entry = practice_table[ent]
-                    if this_week[today.weekday()] == entry[0]:
-                        entry[1], entry[2] = fullname_entry.get(), int(minutes)
-                        break
-                    else:
-                        if ent == len(practice_table) - 1:
-                            data[username][3].append([id_entry.get(), fullname_entry.get(),
-                                                      int(minutes)])
-                        else:
-                            continue
-                # save user data to database and refresh display
-                filename = "user_data"
-                output_file = open(filename, 'wb')
-                pickle.dump(data, output_file)
-                output_file.close()
-                load_entries(this_week)
-                print(f"\nUpdated data load for {username}:\n{data[username]}")
 
         # buttons
         # To choose a session, click the practice session and press the button "Select Practice Session"
         # To update a past entry, modify the entry as you desire, then press "Refresh practice calendar"
         # For creating a new record, type information in box and then press "Update today's practice"
-        button_frame = tk.Frame(root)
-        button_frame.grid(column=0, row=3)
 
-        input_button = tk.Button(button_frame, text="Edit today's practice session", command=input_record)
+        input_button = tk.Button(button_frame,text="Edit today's practice session",
+                    command=lambda:input_record(username,this_week,today,fullname_entry,award_entry,id_entry,data))
         input_button.grid(column=0, row=0, pady=10)
 
     if user_type == 0:  # If a student
