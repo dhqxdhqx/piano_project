@@ -578,6 +578,11 @@ def practice_screen(user_type):
                 # load week with dates and any entries
                 load_entries(student, week_dict[selected_week])
 
+            def edit_week_data():
+                input_button = tk.Button(button_frame,text="Edit today's practice session",
+                command=lambda:input_record(student,this_week,today,fullname_entry,award_entry,id_entry,data))
+                input_button.grid(column=0, row=0, pady=10)
+
             # Pull up the week menu
             print("Student ", student, "was selected-")
             select_week = tk.Button(teacher_select_frame, text="Select a week", bg="#275D38", fg='white', command=week_selected)
@@ -591,7 +596,13 @@ def practice_screen(user_type):
             for items in week_dict.keys():
                 week_dropdown.insert('end', items)
             week_dropdown.grid(column=1, row=2)
-    
+
+            edit_week = tk.Button(teacher_select_frame, text="Edit Student Data", bg="#275D38", fg='white', command= edit_week_data)
+            edit_week.grid(column=2, row=0)
+
+
+
+
 
     def student_page():
         # Create the current week to populate the date data field
